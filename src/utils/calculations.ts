@@ -85,12 +85,13 @@ export const formatNumber = (amount: number): string => {
 export const formatCurrency = (amount: number, currencyCode: string = 'USD'): string => {
   return new Intl.NumberFormat(undefined, {
     style: 'currency',
-    currency: currencyCode
+    currency: currencyCode,
+    currencyDisplay: 'narrowSymbol'
   }).format(amount);
 };
 
 export const formatDate = (date: Date): string => {
-  return new Intl.DateTimeFormat(undefined {
+  return new Intl.DateTimeFormat(undefined, {
     day: '2-digit',
     month: 'long',
     year: 'numeric'

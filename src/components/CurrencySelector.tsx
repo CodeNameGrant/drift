@@ -15,11 +15,9 @@ const CurrencySelector: React.FC = () => {
     >
       {currencies.map(c => (
         <option key={c.code} value={c.code}>
-          {c.code} - {c.name}
+          {c.symbol} - {c.name}
         </option>
       ))}
     </select>
   );
 };
-
-export default CurrencySelector;
