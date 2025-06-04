@@ -32,46 +32,30 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ result }) => {
         </h2>
         
         <div className="space-y-6">
-          <div className="grid grid-cols-2 gap-6">
-            <div className="flex flex-col">
-              <span className="text-sm text-gray-500 dark:text-gray-400 mb-1">Principal Amount</span>
-              <span className="text-xl font-bold text-primary dark:text-primary-light">
-                {formatCurrency(principalAmount, currency.code)}
-              </span>
-            </div>
-            
+          <div className="grid grid-cols-2 gap-6">            
             <div className="flex flex-col">
               <span className="text-sm text-gray-500 dark:text-gray-400 mb-1">Monthly Payment</span>
               <span className="text-xl font-bold text-primary dark:text-primary-light">
                 {formatCurrency(monthlyPayment, currency.code)}
               </span>
             </div>
-          </div>
 
-          <div className="grid grid-cols-2 gap-6">
             <div className="flex flex-col">
               <span className="text-sm text-gray-500 dark:text-gray-400 mb-1">Total Interest</span>
               <span className="text-xl font-bold text-primary dark:text-primary-light">
                 {formatCurrency(totalInterest, currency.code)}
               </span>
             </div>
-            
+          </div>
+
+          <div className="grid grid-cols-2 gap-6">
             <div className="flex flex-col">
               <span className="text-sm text-gray-500 dark:text-gray-400 mb-1">Total Repayment</span>
               <span className="text-xl font-bold text-primary dark:text-primary-light">
                 {formatCurrency(totalAmountRepaid, currency.code)}
               </span>
             </div>
-          </div>
 
-          <div className="grid grid-cols-2 gap-6">
-            <div className="flex flex-col">
-              <span className="text-sm text-gray-500 dark:text-gray-400 mb-1">Effective APR</span>
-              <span className="text-xl font-bold text-primary dark:text-primary-light">
-                {formatPercentage(effectiveAnnualRate)}
-              </span>
-            </div>
-            
             <div className="flex flex-col">
               <span className="text-sm text-gray-500 dark:text-gray-400 mb-1">Cost of Loan</span>
               <span className="text-xl font-bold text-primary dark:text-primary-light">
