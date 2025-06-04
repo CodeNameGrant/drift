@@ -12,26 +12,26 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ result }) => {
   const { monthlyPayment, totalInterest, payoffDate } = result;
 
   return (
-    <div className="w-full max-w-md bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transition-all duration-300 transform">
-      <div className="p-6 space-y-6">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white text-center">
+    <div className="w-full max-w-md bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-hidden transition-all duration-300 transform">
+      <div className="p-8 space-y-8">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white text-center mb-8">
           Loan Summary
         </h2>
         
-        <div className="space-y-4">
+        <div className="space-y-6">
           <div className="flex flex-col">
-            <span className="text-sm text-gray-500 dark:text-gray-400">Monthly Payment</span>
-            <span className="text-2xl font-bold text-gray-900 dark:text-white">{formatCurrency(monthlyPayment)}</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400 mb-2">Monthly Payment</span>
+            <span className="text-3xl font-extrabold text-primary dark:text-primary-lighter">{formatCurrency(monthlyPayment)}</span>
           </div>
           
           <div className="flex flex-col">
-            <span className="text-sm text-gray-500 dark:text-gray-400">Total Interest</span>
-            <span className="text-2xl font-bold text-gray-900 dark:text-white">{formatCurrency(totalInterest)}</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400 mb-2">Total Interest</span>
+            <span className="text-3xl font-extrabold text-primary dark:text-primary-lighter">{formatCurrency(totalInterest)}</span>
           </div>
           
           <div className="flex flex-col">
-            <span className="text-sm text-gray-500 dark:text-gray-400">Payoff Date</span>
-            <span className="text-2xl font-bold text-gray-900 dark:text-white">{formatDate(payoffDate)}</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400 mb-2">Payoff Date</span>
+            <span className="text-3xl font-extrabold text-primary dark:text-primary-lighter">{formatDate(payoffDate)}</span>
           </div>
         </div>
       </div>

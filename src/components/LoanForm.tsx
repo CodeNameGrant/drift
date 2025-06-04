@@ -43,7 +43,6 @@ const LoanForm: React.FC<LoanFormProps> = ({ onCalculate }) => {
       }));
     }
     
-    // Mark field as touched
     setTouched(prev => ({
       ...prev,
       [name]: true
@@ -58,7 +57,6 @@ const LoanForm: React.FC<LoanFormProps> = ({ onCalculate }) => {
       [name]: true
     }));
     
-    // Validate on blur
     const validationErrors = validateForm(formData);
     setErrors(validationErrors);
   };
@@ -66,18 +64,15 @@ const LoanForm: React.FC<LoanFormProps> = ({ onCalculate }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate form
     const validationErrors = validateForm(formData);
     setErrors(validationErrors);
     
-    // Mark all fields as touched
     setTouched({
       loanAmount: true,
       interestRate: true,
       loanTerm: true
     });
     
-    // If no errors, submit form
     if (Object.keys(validationErrors).length === 0) {
       onCalculate(formData);
     }
@@ -94,6 +89,17 @@ const LoanForm: React.FC<LoanFormProps> = ({ onCalculate }) => {
     setErrors({});
     setTouched({});
   };
+
+  const inputClasses = (fieldName: string) => `
+    block w-full rounded-lg py-3 px-4 
+    text-gray-900 bg-white dark:bg-gray-800 dark:text-white 
+    border ${touched[fieldName] && errors[fieldName] 
+      ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
+      : 'border-gray-300 dark:border-gray-700 focus:border-primary focus:ring-primary'
+    } 
+    focus:outline-none focus:ring-2 
+    transition duration-200
+  `;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 w-full max-w-md">
@@ -112,11 +118,7 @@ const LoanForm: React.FC<LoanFormProps> = ({ onCalculate }) => {
               onBlur={handleBlur}
               min="1"
               step="any"
-              className={`block w-full rounded-md py-3 px-4 text-gray-900 bg-white dark:bg-gray-800 dark:text-white border ${
-                touched.loanAmount && errors.loanAmount 
-                  ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
-                  : 'border-gray-300 dark:border-gray-700 focus:border-blue-500 focus:ring-blue-500'
-              } focus:outline-none focus:ring-2 transition duration-200`}
+              className={inputClasses('loanAmount')}
               placeholder="Enter loan amount"
             />
           </div>
@@ -140,11 +142,7 @@ const LoanForm: React.FC<LoanFormProps> = ({ onCalculate }) => {
               min="0.1"
               max="100"
               step="0.1"
-              className={`block w-full rounded-md py-3 px-4 text-gray-900 bg-white dark:bg-gray-800 dark:text-white border ${
-                touched.interestRate && errors.interestRate 
-                  ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
-                  : 'border-gray-300 dark:border-gray-700 focus:border-blue-500 focus:ring-blue-500'
-              } focus:outline-none focus:ring-2 transition duration-200`}
+              className={inputClasses('interestRate')}
               placeholder="Enter interest rate"
             />
           </div>
@@ -168,11 +166,7 @@ const LoanForm: React.FC<LoanFormProps> = ({ onCalculate }) => {
                 onBlur={handleBlur}
                 min="1"
                 max={formData.termUnit === 'years' ? 30 : 360}
-                className={`block w-full rounded-md py-3 px-4 text-gray-900 bg-white dark:bg-gray-800 dark:text-white border ${
-                  touched.loanTerm && errors.loanTerm 
-                    ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
-                    : 'border-gray-300 dark:border-gray-700 focus:border-blue-500 focus:ring-blue-500'
-                } focus:outline-none focus:ring-2 transition duration-200`}
+                className={inputClasses('loanTerm')}
                 placeholder={formData.termUnit === 'years' ? "1-30" : "1-360"}
               />
             </div>
@@ -186,7 +180,7 @@ const LoanForm: React.FC<LoanFormProps> = ({ onCalculate }) => {
               id="termUnit"
               value={formData.termUnit}
               onChange={handleInputChange}
-              className="block w-full rounded-md py-3 px-4 text-gray-900 bg-white dark:bg-gray-800 dark:text-white border border-gray-300 dark:border-gray-700 focus:border-blue-500 focus:ring-blue-500 focus:outline-none focus:ring-2 transition duration-200"
+              className="block w-full rounded-lg py-3 px-4 text-gray-900 bg-white dark:bg-gray-800 dark:text-white border border-gray-300 dark:border-gray-700 focus:border-primary focus:ring-primary focus:outline-none focus:ring-2 transition duration-200"
             >
               <option value="years">Years</option>
               <option value="months">Months</option>
@@ -208,7 +202,7 @@ const LoanForm: React.FC<LoanFormProps> = ({ onCalculate }) => {
               id="startDate"
               value={formData.startDate.toISOString().split('T')[0]}
               onChange={handleInputChange}
-              className="block w-full rounded-md py-3 px-4 text-gray-900 bg-white dark:bg-gray-800 dark:text-white border border-gray-300 dark:border-gray-700 focus:border-blue-500 focus:ring-blue-500 focus:outline-none focus:ring-2 transition duration-200"
+              className="block w-full rounded-lg py-3 px-4 text-gray-900 bg-white dark:bg-gray-800 dark:text-white border border-gray-300 dark:border-gray-700 focus:border-primary focus:ring-primary focus:outline-none focus:ring-2 transition duration-200"
             />
           </div>
         </div>
@@ -218,13 +212,13 @@ const LoanForm: React.FC<LoanFormProps> = ({ onCalculate }) => {
         <button
           type="button"
           onClick={handleClear}
-          className="flex-1 py-3 px-4 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-white rounded-md transition duration-200"
+          className="flex-1 py-3 px-4 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-white rounded-lg transition duration-200"
         >
           Clear Form
         </button>
         <button
           type="submit"
-          className="flex-1 py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition duration-200"
+          className="flex-1 py-3 px-4 bg-primary hover:bg-primary-darker text-white rounded-lg transition duration-200"
         >
           Calculate
         </button>
