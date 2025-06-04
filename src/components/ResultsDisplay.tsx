@@ -21,7 +21,6 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ result }) => {
     loanTermYears,
     loanTermMonths,
     costPercentage,
-    amortizationSchedule
   } = result;
 
   return (
@@ -80,36 +79,6 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ result }) => {
               <span className="text-xl font-bold text-primary dark:text-primary-light">
                 {formatDate(payoffDate)}
               </span>
-            </div>
-          </div>
-
-          <div className="mt-8">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-              Payment Schedule
-            </h3>
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                <thead>
-                  <tr>
-                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400">#</th>
-                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400">Date</th>
-                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400">Principal</th>
-                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400">Interest</th>
-                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400">Balance</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                  {amortizationSchedule.map((payment, index) => (
-                    <tr key={payment.paymentNumber} className={index === 3 ? 'border-b-2 border-gray-300 dark:border-gray-600' : ''}>
-                      <td className="px-3 py-2 text-sm">{payment.paymentNumber}</td>
-                      <td className="px-3 py-2 text-sm">{formatDate(payment.date)}</td>
-                      <td className="px-3 py-2 text-sm">{formatCurrency(payment.principal, currency.code)}</td>
-                      <td className="px-3 py-2 text-sm">{formatCurrency(payment.interest, currency.code)}</td>
-                      <td className="px-3 py-2 text-sm">{formatCurrency(payment.balance, currency.code)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
             </div>
           </div>
         </div>
