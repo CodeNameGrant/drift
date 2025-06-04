@@ -90,7 +90,7 @@ export const formatCurrency = (amount: number, currencyCode: string = 'USD'): st
 };
 
 export const formatDate = (date: Date): string => {
-  return new Intl.DateTimeFormat(undefined, {
+  return new Intl.DateTimeFormat(undefined {
     day: '2-digit',
     month: 'long',
     year: 'numeric'
