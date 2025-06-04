@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { LoanFormData, FormErrors } from '../types';
-import { validateForm } from '../utils/calculations';
+import { validateForm, formatNumberWithCommas } from '../utils/calculations';
 
 interface LoanFormProps {
   onCalculate: (data: LoanFormData) => void;
@@ -24,7 +24,12 @@ const LoanForm: React.FC<LoanFormProps> = ({ onCalculate }) => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target as HTMLInputElement;
     
-    if (name === 'startDate') {
+    if (name === 'loanAmount') {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value.replace(/\D/g, ''); // remove all non-digits
+      }));
+    } else if (name === 'startDate') {
       setFormData(prev => ({
         ...prev,
         [name]: new Date(value)
@@ -90,6 +95,13 @@ const LoanForm: React.FC<LoanFormProps> = ({ onCalculate }) => {
     setTouched({});
   };
 
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    const pasted = e.clipboardData.getData('Text');
+    if (!/^\d+$/.test(pasted)) {
+      e.preventDefault();
+    }
+  };
+
   const inputClasses = (fieldName: string) => `
     block w-full rounded-lg py-3 px-4 
     text-gray-900 bg-white dark:bg-gray-800 dark:text-white 
@@ -110,16 +122,16 @@ const LoanForm: React.FC<LoanFormProps> = ({ onCalculate }) => {
           </label>
           <div className="relative mt-1 rounded-md shadow-sm">
             <input
-  type="text"
-  name="loanAmount"
-  id="loanAmount"
-  value={formatNumberWithCommas(formData.loanAmount)}
-  onChange={handleFormattedInputChange}
-  onPaste={handlePaste}
-  onBlur={handleBlur}
-  className={inputClasses('loanAmount')}
-  placeholder="Enter loan amount"
-/>
+              type="text"
+              name="loanAmount"
+              id="loanAmount"
+              value={formatNumberWithCommas(formData.loanAmount)}
+              onChange={handleInputChange}
+              onPaste={handlePaste}
+              onBlur={handleBlur}
+              className={inputClasses('loanAmount')}
+              placeholder="Enter loan amount"
+            />
           </div>
           {touched.loanAmount && errors.loanAmount && (
             <p className="mt-1 text-sm text-red-500">{errors.loanAmount}</p>
