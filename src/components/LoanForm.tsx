@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { LoanFormData, FormErrors } from '../types';
-import { validateForm, formatCurrency } from '../utils/calculations';
+import { validateForm, formatCurrency, formatNumberWithCommas } from '../utils/calculations';
 
 interface LoanFormProps {
   onCalculate: (data: LoanFormData) => void;
@@ -28,7 +28,7 @@ const LoanForm: React.FC<LoanFormProps> = ({ onCalculate }) => {
     if (name === 'loanAmount') {
       setFormData(prev => ({
         ...prev,
-        [name]: value.replace(/\D/g, ''); // remove all non-digits
+        [name]: parseFloat(value.replace(/\D/g, '') || '0')
       }));
     } else if (name === 'startDate') {
       setFormData(prev => ({
@@ -126,7 +126,7 @@ const LoanForm: React.FC<LoanFormProps> = ({ onCalculate }) => {
               type="text"
               name="loanAmount"
               id="loanAmount"
-              value={formatCurrency(formData.loanAmount, currency.code)}
+              value={formatNumberWithCommas(formData.loanAmount)}
               onChange={handleInputChange}
               onPaste={handlePaste}
               onBlur={handleBlur}
