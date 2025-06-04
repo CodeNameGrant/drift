@@ -1,17 +1,23 @@
-import { LoanFormData, LoanResult, Currency } from '../types';
+import { LoanFormData, LoanResult } from '../types';
 
 export const calculateLoan = (formData: LoanFormData): LoanResult => {
   const { loanAmount, interestRate, loanTerm, termUnit, startDate } = formData;
   
+  // Convert interest rate from percentage to decimal
   const monthlyInterestRate = interestRate / 100 / 12;
+  
+  // Calculate number of monthly payments
   const numberOfPayments = termUnit === 'years' ? loanTerm * 12 : loanTerm;
   
+  // Calculate monthly payment using the loan formula
   const monthlyPayment = loanAmount * 
     (monthlyInterestRate * Math.pow(1 + monthlyInterestRate, numberOfPayments)) / 
     (Math.pow(1 + monthlyInterestRate, numberOfPayments) - 1);
   
+  // Calculate total interest paid over the life of the loan
   const totalInterest = (monthlyPayment * numberOfPayments) - loanAmount;
   
+  // Calculate payoff date
   const payoffDate = new Date(startDate);
   payoffDate.setMonth(payoffDate.getMonth() + numberOfPayments);
   
@@ -22,21 +28,18 @@ export const calculateLoan = (formData: LoanFormData): LoanResult => {
   };
 };
 
-export const formatCurrency = (amount: number, currency?: Currency): string => {
-  const formatter = new Intl.NumberFormat(navigator.language, {
-    style: 'currency',
-    currency: currency?.code || 'USD',
+export const formatCurrency = (amount: number): string => {
+  return new Intl.NumberFormat('en-US', {
+    style: 'decimal',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
-  });
-
-  return formatter.format(amount);
+  }).format(amount);
 };
 
 export const formatDate = (date: Date): string => {
-  return new Intl.DateTimeFormat(navigator.language, {
+  return new Intl.DateTimeFormat('en-US', {
+    month: '2-digit',
     day: '2-digit',
-    month: 'long',
     year: 'numeric'
   }).format(date);
 };
