@@ -8,7 +8,7 @@ function App() {
   const { theme, toggleTheme } = useTheme();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-850 dark:to-gray-950 text-gray-900 dark:text-white transition-colors duration-300">
+    <div className="min-h-screen bg-appBackground-light dark:bg-appBackground-dark text-gray-900 dark:text-white transition-colors duration-300">
       <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
       <CurrencySelector />
       <div className="container mx-auto py-12 px-4">
@@ -17,5 +17,3 @@ function App() {
     </div>
   );
 }
-
-export default App;
