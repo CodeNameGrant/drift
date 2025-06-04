@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { LoanFormData, FormErrors } from '../types';
-import { validateForm, formatNumberWithCommas } from '../utils/calculations';
+import { validateForm, formatCurrency } from '../utils/calculations';
 
 interface LoanFormProps {
   onCalculate: (data: LoanFormData) => void;
@@ -125,7 +125,7 @@ const LoanForm: React.FC<LoanFormProps> = ({ onCalculate }) => {
               type="text"
               name="loanAmount"
               id="loanAmount"
-              value={formatNumberWithCommas(formData.loanAmount)}
+              value={formatCurrency(formData.loanAmount)}
               onChange={handleInputChange}
               onPaste={handlePaste}
               onBlur={handleBlur}
