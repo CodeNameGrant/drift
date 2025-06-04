@@ -9,6 +9,7 @@ interface LoanFormProps {
 const LoanForm: React.FC<LoanFormProps> = ({ onCalculate }) => {
   const today = new Date();
   const formattedDate = today.toISOString().split('T')[0];
+  const {currency} = useCurrency();
 
   const [formData, setFormData] = useState<LoanFormData>({
     loanAmount: 1_000_000,
@@ -125,7 +126,7 @@ const LoanForm: React.FC<LoanFormProps> = ({ onCalculate }) => {
               type="text"
               name="loanAmount"
               id="loanAmount"
-              value={formatCurrency(formData.loanAmount)}
+              value={formatCurrency(formData.loanAmount, currency.code)}
               onChange={handleInputChange}
               onPaste={handlePaste}
               onBlur={handleBlur}
