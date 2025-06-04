@@ -6,13 +6,13 @@ export default {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#4F46E5',
-          darker: '#4338CA',
-          lighter: '#6366F1'
+          DEFAULT: '#6B4DE6',
+          dark: '#8A6FFF',
+          light: '#9B85FF'
         },
-        gray: {
-          850: '#1B1E27',
-          950: '#0A0C10'
+        appBackground: {
+          light: '#F5F0FF',
+          dark: '#2D2440'
         }
       },
       fontFamily: {
