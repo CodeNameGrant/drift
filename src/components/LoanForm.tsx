@@ -110,17 +110,16 @@ const LoanForm: React.FC<LoanFormProps> = ({ onCalculate }) => {
           </label>
           <div className="relative mt-1 rounded-md shadow-sm">
             <input
-              type="number"
-              name="loanAmount"
-              id="loanAmount"
-              value={formData.loanAmount || ''}
-              onChange={handleInputChange}
-              onBlur={handleBlur}
-              min="1"
-              step="any"
-              className={inputClasses('loanAmount')}
-              placeholder="Enter loan amount"
-            />
+  type="text"
+  name="loanAmount"
+  id="loanAmount"
+  value={formatNumberWithCommas(formData.loanAmount)}
+  onChange={handleFormattedInputChange}
+  onPaste={handlePaste}
+  onBlur={handleBlur}
+  className={inputClasses('loanAmount')}
+  placeholder="Enter loan amount"
+/>
           </div>
           {touched.loanAmount && errors.loanAmount && (
             <p className="mt-1 text-sm text-red-500">{errors.loanAmount}</p>
