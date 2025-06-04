@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { LoanFormData, FormErrors } from '../types';
 import { validateForm, formatCurrency, formatNumberWithCommas } from '../utils/calculations';
-import {useCurrency} from '../context/CurrencyContext';
+import { useCurrency } from '../context/CurrencyContext';
 
 interface LoanFormProps {
   onCalculate: (data: LoanFormData) => void;
@@ -10,6 +10,7 @@ interface LoanFormProps {
 const LoanForm: React.FC<LoanFormProps> = ({ onCalculate }) => {
   const today = new Date();
   const formattedDate = today.toISOString().split('T')[0];
+  const {currency} = useCurrency();
 
   const [formData, setFormData] = useState<LoanFormData>({
     loanAmount: 1_000_000,
@@ -126,7 +127,7 @@ const LoanForm: React.FC<LoanFormProps> = ({ onCalculate }) => {
               type="text"
               name="loanAmount"
               id="loanAmount"
-              value={formatNumberWithCommas(formData.loanAmount)}
+              value={formatCurrency(formData.loanAmount, currency.code)}
               onChange={handleInputChange}
               onPaste={handlePaste}
               onBlur={handleBlur}
