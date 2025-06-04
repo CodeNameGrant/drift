@@ -11,9 +11,9 @@ const LoanForm: React.FC<LoanFormProps> = ({ onCalculate }) => {
   const formattedDate = today.toISOString().split('T')[0];
 
   const [formData, setFormData] = useState<LoanFormData>({
-    loanAmount: 0,
-    interestRate: 0,
-    loanTerm: 0,
+    loanAmount: 1_000_000,
+    interestRate: 10,
+    loanTerm: 10,
     termUnit: 'years',
     startDate: today
   });
