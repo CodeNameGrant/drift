@@ -46,3 +46,5 @@ const LoanCalculator: React.FC = () => {
     </div>
   );
 };
+
+export default LoanCalculator

@@ -46,3 +46,5 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ result }) => {
     </div>
   );
 };
+
+export default ResultsDisplay
