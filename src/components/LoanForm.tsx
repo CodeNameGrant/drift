@@ -127,7 +127,7 @@ const LoanForm: React.FC<LoanFormProps> = ({ onCalculate }) => {
               type="text"
               name="loanAmount"
               id="loanAmount"
-              value={formatCurrency(formData.loanAmount, currency.code)}
+              value={formatCurrency(formData.loanAmount, currency.code, false)}
               onChange={handleInputChange}
               onPaste={handlePaste}
               onBlur={handleBlur}
