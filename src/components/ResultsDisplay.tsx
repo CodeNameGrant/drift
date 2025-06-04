@@ -1,6 +1,7 @@
 import React from 'react';
 import { LoanResult } from '../types';
 import { formatCurrency, formatDate } from '../utils/calculations';
+import { useCurrency } from '../hooks/useCurrency';
 
 interface ResultsDisplayProps {
   result: LoanResult | null;
@@ -9,6 +10,7 @@ interface ResultsDisplayProps {
 const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ result }) => {
   if (!result) return null;
 
+  const { currency } = useCurrency();
   const { monthlyPayment, totalInterest, payoffDate } = result;
 
   return (
@@ -21,17 +23,23 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ result }) => {
         <div className="space-y-6">
           <div className="flex flex-col">
             <span className="text-sm text-gray-500 dark:text-gray-400 mb-2">Monthly Payment</span>
-            <span className="text-3xl font-extrabold text-primary dark:text-primary-lighter">{formatCurrency(monthlyPayment)}</span>
+            <span className="text-3xl font-extrabold text-primary dark:text-primary-lighter">
+              {formatCurrency(monthlyPayment, currency)}
+            </span>
           </div>
           
           <div className="flex flex-col">
             <span className="text-sm text-gray-500 dark:text-gray-400 mb-2">Total Interest</span>
-            <span className="text-3xl font-extrabold text-primary dark:text-primary-lighter">{formatCurrency(totalInterest)}</span>
+            <span className="text-3xl font-extrabold text-primary dark:text-primary-lighter">
+              {formatCurrency(totalInterest, currency)}
+            </span>
           </div>
           
           <div className="flex flex-col">
             <span className="text-sm text-gray-500 dark:text-gray-400 mb-2">Payoff Date</span>
-            <span className="text-3xl font-extrabold text-primary dark:text-primary-lighter">{formatDate(payoffDate)}</span>
+            <span className="text-3xl font-extrabold text-primary dark:text-primary-lighter">
+              {formatDate(payoffDate)}
+            </span>
           </div>
         </div>
       </div>

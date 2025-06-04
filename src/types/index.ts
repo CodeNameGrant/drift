@@ -17,3 +17,9 @@ export interface FormErrors {
   interestRate?: string;
   loanTerm?: string;
 }
+
+export interface Currency {
+  code: string;
+  symbol: string;
+  name: string;
+}
