@@ -82,7 +82,7 @@ export const formatNumber = (amount: number): string => {
   }).format(amount);
 };
 
-export const formatCurrency = (amount: number, currencyCode: string = 'USD', showDecimals? = true): string => {
+export const formatCurrency = (amount: number, currencyCode: string = 'USD', showDecimals = true): string => {
   const options: Intl.NumberFormatOptions = {
     style: 'currency',
     currency: currencyCode,
