@@ -69,7 +69,7 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ result }) => {
               <span className="text-sm text-gray-500 dark:text-gray-400 mb-1">Term</span>
               <span className="text-xl font-bold text-primary dark:text-primary-light">
                 {loanTermYears.toFixed(1)} years
-                <span className="text-sm text-gray-500 dark:text-gray-400 ml-1">
+                <span className="block text-sm text-gray-500 dark:text-gray-400 ml-1">
                   ({loanTermMonths} months)
                 </span>
               </span>
