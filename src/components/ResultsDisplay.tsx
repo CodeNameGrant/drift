@@ -36,14 +36,14 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ result }) => {
             <div className="flex flex-col">
               <span className="text-sm text-gray-500 dark:text-gray-400 mb-1">Monthly Payment</span>
               <span className="text-xl font-bold text-primary dark:text-primary-light">
-                {formatCurrency(monthlyPayment, currency.code)}
+                {formatCurrency(monthlyPayment, currency.symbol)}
               </span>
             </div>
 
             <div className="flex flex-col">
               <span className="text-sm text-gray-500 dark:text-gray-400 mb-1">Total Interest</span>
               <span className="text-xl font-bold text-primary dark:text-primary-light">
-                {formatCurrency(totalInterest, currency.code)}
+                {formatCurrency(totalInterest, currency.symbol)}
               </span>
             </div>
           </div>
@@ -52,7 +52,7 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ result }) => {
             <div className="flex flex-col">
               <span className="text-sm text-gray-500 dark:text-gray-400 mb-1">Total Repayment</span>
               <span className="text-xl font-bold text-primary dark:text-primary-light">
-                {formatCurrency(totalAmountRepaid, currency.code)}
+                {formatCurrency(totalAmountRepaid, currency.symbol)}
               </span>
             </div>
 
