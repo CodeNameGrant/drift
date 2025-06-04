@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { LoanFormData, FormErrors } from '../types';
 import { validateForm, formatCurrency, formatNumberWithCommas } from '../utils/calculations';
+import {useCurrency} from '../context/CurrencyContext';
 
 interface LoanFormProps {
   onCalculate: (data: LoanFormData) => void;
