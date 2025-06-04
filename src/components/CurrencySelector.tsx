@@ -21,3 +21,5 @@ const CurrencySelector: React.FC = () => {
     </select>
   );
 };
+
+export default CurrencySelector
