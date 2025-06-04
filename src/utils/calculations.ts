@@ -82,12 +82,19 @@ export const formatNumber = (amount: number): string => {
   }).format(amount);
 };
 
-export const formatCurrency = (amount: number, currencyCode: string = 'USD'): string => {
-  return new Intl.NumberFormat(undefined, {
+export const formatCurrency = (amount: number, currencyCode: string = 'USD', showDecimals? = true): string => {
+  const options: Intl.NumberFormatOptions = {
     style: 'currency',
     currency: currencyCode,
     currencyDisplay: 'narrowSymbol'
-  }).format(amount);
+  };
+
+  if (!showDecimals) {
+    options.minimumFractionDigits = 0;
+    options.maximumFractionDigits = 0;
+  }
+
+  return new Intl.NumberFormat(undefined, options).format(amount);
 };
 
 export const formatDate = (date: Date): string => {
