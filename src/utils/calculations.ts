@@ -131,3 +131,8 @@ export const validateForm = (data: Partial<LoanFormData>) => {
   
   return errors;
 };
+
+export const formatNumberWithCommas = (value: string | number): string => {
+  const digits = typeof value === 'number' ? value.toString() : value.replace(/\D/g, '');
+  return digits.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+};
