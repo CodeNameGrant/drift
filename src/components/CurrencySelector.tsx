@@ -11,11 +11,11 @@ const CurrencySelector: React.FC = () => {
         const selected = currencies.find(c => c.code === e.target.value);
         if (selected) setCurrency(selected);
       }}
-      className="rounded-lg py-2 px-3 text-sm bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 focus:border-primary focus:ring-primary focus:outline-none focus:ring-2 transition duration-200"
+      className="block rounded-lg py-2 px-3 text-sm bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 focus:border-primary focus:ring-primary focus:outline-none focus:ring-2 transition duration-200"
     >
       {currencies.map(c => (
         <option key={c.code} value={c.code}>
-          {c.symbol} - {c.name}
+          {c.symbol}
         </option>
       ))}
     </select>
