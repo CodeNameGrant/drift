@@ -3,14 +3,15 @@ import LoanForm from './LoanForm';
 import ResultsDisplay from './ResultsDisplay';
 import DebtVisualization from './DebtVisualization';
 import DebtDashboard from './DebtDashboard';
+import LoanAccountDashboard from './LoanAccountDashboard';
 import { LoanFormData, LoanResult } from '../types';
 import { calculateLoan } from '../utils/calculations';
-import { Calculator, TrendingDown, Target, BarChart3 } from 'lucide-react';
+import { Calculator, TrendingDown, Target, BarChart3, CreditCard } from 'lucide-react';
 
 const LoanCalculator: React.FC = () => {
   const [result, setResult] = useState<LoanResult | null>(null);
   const [isCalculated, setIsCalculated] = useState(false);
-  const [activeTab, setActiveTab] = useState<'calculator' | 'visualization' | 'dashboard'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'visualization' | 'calculator' | 'accounts'>('dashboard');
 
   const handleCalculate = (formData: LoanFormData) => {
     const calculatedResult = calculateLoan(formData);
@@ -40,6 +41,17 @@ const LoanCalculator: React.FC = () => {
             Debt Dashboard
           </button>
           <button
+            onClick={() => setActiveTab('accounts')}
+            className={`flex items-center gap-2 px-6 py-3 rounded-lg transition-all duration-200 ${
+              activeTab === 'accounts'
+                ? 'bg-primary text-white shadow-md'
+                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+            }`}
+          >
+            <CreditCard className="h-5 w-5" />
+            Loan Accounts
+          </button>
+          <button
             onClick={() => setActiveTab('visualization')}
             className={`flex items-center gap-2 px-6 py-3 rounded-lg transition-all duration-200 ${
               activeTab === 'visualization'
@@ -66,6 +78,8 @@ const LoanCalculator: React.FC = () => {
 
       {/* Tab Content */}
       {activeTab === 'dashboard' && <DebtDashboard />}
+      
+      {activeTab === 'accounts' && <LoanAccountDashboard />}
       
       {activeTab === 'visualization' && <DebtVisualization />}
       
