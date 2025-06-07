@@ -2,14 +2,15 @@ import React, { useState } from 'react';
 import LoanForm from './LoanForm';
 import ResultsDisplay from './ResultsDisplay';
 import DebtVisualization from './DebtVisualization';
+import DebtDashboard from './DebtDashboard';
 import { LoanFormData, LoanResult } from '../types';
 import { calculateLoan } from '../utils/calculations';
-import { Calculator, TrendingDown } from 'lucide-react';
+import { Calculator, TrendingDown, Target, BarChart3 } from 'lucide-react';
 
 const LoanCalculator: React.FC = () => {
   const [result, setResult] = useState<LoanResult | null>(null);
   const [isCalculated, setIsCalculated] = useState(false);
-  const [activeTab, setActiveTab] = useState<'calculator' | 'visualization'>('calculator');
+  const [activeTab, setActiveTab] = useState<'calculator' | 'visualization' | 'dashboard'>('dashboard');
 
   const handleCalculate = (formData: LoanFormData) => {
     const calculatedResult = calculateLoan(formData);
@@ -28,15 +29,15 @@ const LoanCalculator: React.FC = () => {
       <div className="flex justify-center mb-8">
         <div className="bg-white dark:bg-gray-800 rounded-lg p-1 shadow-lg">
           <button
-            onClick={() => setActiveTab('calculator')}
+            onClick={() => setActiveTab('dashboard')}
             className={`flex items-center gap-2 px-6 py-3 rounded-lg transition-all duration-200 ${
-              activeTab === 'calculator'
+              activeTab === 'dashboard'
                 ? 'bg-primary text-white shadow-md'
                 : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
             }`}
           >
-            <Calculator className="h-5 w-5" />
-            Loan Calculator
+            <Target className="h-5 w-5" />
+            Debt Dashboard
           </button>
           <button
             onClick={() => setActiveTab('visualization')}
@@ -49,11 +50,26 @@ const LoanCalculator: React.FC = () => {
             <TrendingDown className="h-5 w-5" />
             Debt Visualization
           </button>
+          <button
+            onClick={() => setActiveTab('calculator')}
+            className={`flex items-center gap-2 px-6 py-3 rounded-lg transition-all duration-200 ${
+              activeTab === 'calculator'
+                ? 'bg-primary text-white shadow-md'
+                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+            }`}
+          >
+            <Calculator className="h-5 w-5" />
+            Loan Calculator
+          </button>
         </div>
       </div>
 
       {/* Tab Content */}
-      {activeTab === 'calculator' ? (
+      {activeTab === 'dashboard' && <DebtDashboard />}
+      
+      {activeTab === 'visualization' && <DebtVisualization />}
+      
+      {activeTab === 'calculator' && (
         <div className="flex flex-col md:flex-row gap-8 items-start">
           <div className="w-full md:w-1/2">
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-8 transition-all duration-300">
@@ -76,8 +92,6 @@ const LoanCalculator: React.FC = () => {
             )}
           </div>
         </div>
-      ) : (
-        <DebtVisualization />
       )}
     </div>
   );

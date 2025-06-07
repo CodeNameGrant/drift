@@ -40,6 +40,21 @@ export interface DebtAccount {
   monthlyPayment: number;
   interestRate: number;
   color: string;
+  accountType: 'credit_card' | 'personal_loan' | 'mortgage' | 'auto_loan' | 'student_loan' | 'other';
+  startDate: Date;
+  isRevolvingCredit: boolean;
+  // For term-based loans
+  loanTerm?: number;
+  termUnit?: 'months' | 'years';
+  originalBalance?: number;
+  // For revolving credit
+  minimumPaymentPercentage?: number;
+  minimumPaymentAmount?: number;
+  // Calculated fields
+  interestPaidToDate: number;
+  paymentDueDate: Date;
+  remainingTerm?: number;
+  payoffDate?: Date;
 }
 
 export interface DebtVisualizationData {
@@ -54,4 +69,20 @@ export interface Milestone {
   month: number;
   description: string;
   type: 'payoff' | 'halfway' | 'custom';
+}
+
+export interface DebtAccountFormData {
+  name: string;
+  currentBalance: number;
+  interestRate: number;
+  accountType: DebtAccount['accountType'];
+  startDate: Date;
+  isRevolvingCredit: boolean;
+  // For term-based loans
+  loanTerm?: number;
+  termUnit?: 'months' | 'years';
+  monthlyPayment?: number;
+  // For revolving credit
+  minimumPaymentPercentage?: number;
+  minimumPaymentAmount?: number;
 }
