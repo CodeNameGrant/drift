@@ -18,7 +18,7 @@ const LoanCalculator: React.FC = () => {
     <div className="w-full max-w-4xl mx-auto p-6">
       <div className="text-center mb-12">
         <h1 className="text-5xl font-extrabold text-gray-900 dark:text-white mb-3 tracking-tight">Drift</h1>
-        <p className="text-lg text-gray-600 dark:text-gray-400 mt-2">Minimalist debt tracking and loan simulation</p>
+        <p className="text-lg text-gray-600 dark:text-gray-400 mt-2">Find your drift with minimalist debt tracking and loan simulation</p>
       </div>
       
       <div className="flex flex-col md:flex-row gap-8 items-start">
