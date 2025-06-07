@@ -32,3 +32,26 @@ export interface FormErrors {
   interestRate?: string;
   loanTerm?: string;
 }
+
+export interface DebtAccount {
+  id: string;
+  name: string;
+  currentBalance: number;
+  monthlyPayment: number;
+  interestRate: number;
+  color: string;
+}
+
+export interface DebtVisualizationData {
+  month: number;
+  date: string;
+  totalDebt: number;
+  accounts: { [accountId: string]: number };
+  milestone?: string;
+}
+
+export interface Milestone {
+  month: number;
+  description: string;
+  type: 'payoff' | 'halfway' | 'custom';
+}
