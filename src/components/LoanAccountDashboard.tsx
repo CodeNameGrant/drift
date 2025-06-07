@@ -32,7 +32,8 @@ const LoanAccountDashboard: React.FC = () => {
     loanAmount: 0,
     interestType: 'fixed' as 'fixed' | 'linked',
     interestRate: 0,
-    loanTermMonths: 360
+    loanTermMonths: 360,
+    startDate: new Date()
   });
 
   const [newPrimeRate, setNewPrimeRate] = useState(primeRate);
@@ -59,7 +60,8 @@ const LoanAccountDashboard: React.FC = () => {
         loanAmount: newAccount.loanAmount,
         interestType: newAccount.interestType,
         interestRate: newAccount.interestRate,
-        loanTermMonths: newAccount.loanTermMonths
+        loanTermMonths: newAccount.loanTermMonths,
+        startDate: newAccount.startDate
       });
 
       setNewAccount({
@@ -67,7 +69,8 @@ const LoanAccountDashboard: React.FC = () => {
         loanAmount: 0,
         interestType: 'fixed',
         interestRate: 0,
-        loanTermMonths: 360
+        loanTermMonths: 360,
+        startDate: new Date()
       });
       setShowAddForm(false);
       refreshAccounts();
@@ -329,7 +332,7 @@ const LoanAccountDashboard: React.FC = () => {
                 />
               </div>
 
-              <div className="md:col-span-2">
+              <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Loan Term (Months)
                 </label>
@@ -339,6 +342,18 @@ const LoanAccountDashboard: React.FC = () => {
                   onChange={(e) => setNewAccount({ ...newAccount, loanTermMonths: parseFloat(e.target.value) || 0 })}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                   placeholder="360"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Start Date
+                </label>
+                <input
+                  type="date"
+                  value={newAccount.startDate.toISOString().split('T')[0]}
+                  onChange={(e) => setNewAccount({ ...newAccount, startDate: new Date(e.target.value) })}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                 />
               </div>
             </div>
@@ -419,7 +434,7 @@ const LoanAccountDashboard: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
                   <div>
                     <p className="text-sm text-gray-500 dark:text-gray-400">Current Balance</p>
                     <p className="text-xl font-bold text-gray-900 dark:text-white">
@@ -436,6 +451,12 @@ const LoanAccountDashboard: React.FC = () => {
                     <p className="text-sm text-gray-500 dark:text-gray-400">Interest Rate</p>
                     <p className="text-xl font-bold text-gray-900 dark:text-white">
                       {formatPercentage(account.interestRate)}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Start Date</p>
+                    <p className="text-xl font-bold text-gray-900 dark:text-white">
+                      {formatDate(account.startDate)}
                     </p>
                   </div>
                   <div>

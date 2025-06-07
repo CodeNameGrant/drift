@@ -387,8 +387,8 @@ export class LoanAccountManager {
       months++;
     }
 
-    const payoffDate = new Date();
-    payoffDate.setMonth(payoffDate.getMonth() + months);
+    const payoffDate = new Date(account.startDate);
+    payoffDate.setMonth(payoffDate.getMonth() + account.paymentHistory.length + months);
     return payoffDate;
   }
 
@@ -411,7 +411,8 @@ export class LoanAccountManager {
     const schedule = [];
     let balance = account.currentBalance;
     const monthlyRate = account.interestRate / 100 / 12;
-    const startDate = new Date();
+    const startDate = new Date(account.startDate);
+    startDate.setMonth(startDate.getMonth() + account.paymentHistory.length);
 
     for (let i = 1; i <= numberOfPayments && balance > 0.01; i++) {
       const interestPayment = balance * monthlyRate;
@@ -422,7 +423,7 @@ export class LoanAccountManager {
       paymentDate.setMonth(paymentDate.getMonth() + i);
 
       schedule.push({
-        paymentNumber: i,
+        paymentNumber: account.paymentHistory.length + i,
         date: paymentDate,
         payment: account.monthlyPayment,
         principal: principalPayment,
