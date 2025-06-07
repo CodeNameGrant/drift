@@ -24,7 +24,7 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ result }) => {
   } = result;
 
   return (
-    <div className="w-full max-w-md bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-hidden transition-all duration-300">
+    <div className="w-full w-md bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-hidden transition-all duration-300">
       <div className="p-8 space-y-8">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white text-center mb-8">
           Loan Summary
