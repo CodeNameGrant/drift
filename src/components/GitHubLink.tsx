@@ -7,7 +7,7 @@ const GitHubLink: React.FC = () => {
       href="https://github.com/CodeNameGrant/drift/"
       target="_blank"
       rel="noopener noreferrer"
-      className="p-2 rounded-full bg-gray-200 dark:bg-gray-800 transition-colors duration-300 hover:bg-gray-300 dark:hover:bg-gray-700 relative z-10"
+      className="p-2 rounded-full bg-gray-200 dark:bg-gray-800 transition-colors duration-300 hover:bg-gray-300 dark:hover:bg-gray-700 relative"
       aria-label="View source code on GitHub"
       title="View source code on GitHub"
     >
