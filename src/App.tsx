@@ -14,6 +14,7 @@ function App() {
       <div className="min-h-screen bg-appBackground-light dark:bg-appBackground-dark text-gray-900 dark:text-white transition-colors duration-300">
         <div className="fixed top-4 right-4 flex items-center gap-2 z-50">
           <CurrencyIconSelector />
+          <p>test</p>
           <GitHubLink />
           <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
         </div>
