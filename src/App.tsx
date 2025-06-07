@@ -1,6 +1,7 @@
 import React from 'react';
 import LoanCalculator from './components/LoanCalculator';
 import ThemeToggle from './components/ThemeToggle';
+import GitHubLink from './components/GitHubLink';
 import CurrencySelector from './components/CurrencySelector';
 import { useTheme } from './hooks/useTheme';
 import { CurrencyProvider } from './context/CurrencyContext';
@@ -14,6 +15,7 @@ function App() {
         <div className="fixed top-5 left-5 z-50">
           <CurrencySelector />
         </div>
+        <GitHubLink />
         <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
         <div className="container mx-auto py-12 px-4">
           <LoanCalculator />
