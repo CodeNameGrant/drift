@@ -43,13 +43,10 @@ export interface DebtAccount {
   accountType: 'credit_card' | 'personal_loan' | 'mortgage' | 'auto_loan' | 'student_loan' | 'other';
   startDate: Date;
   isRevolvingCredit: boolean;
-  // For term-based loans
-  loanTerm?: number;
-  termUnit?: 'months' | 'years';
+  // Loan term for all accounts
+  loanTerm: number;
+  termUnit: 'months' | 'years';
   originalBalance?: number;
-  // For revolving credit
-  minimumPaymentPercentage?: number;
-  minimumPaymentAmount?: number;
   // Calculated fields
   interestPaidToDate: number;
   paymentDueDate: Date;
@@ -78,11 +75,8 @@ export interface DebtAccountFormData {
   accountType: DebtAccount['accountType'];
   startDate: Date;
   isRevolvingCredit: boolean;
-  // For term-based loans
-  loanTerm?: number;
-  termUnit?: 'months' | 'years';
+  // Loan term for all accounts
+  loanTerm: number;
+  termUnit: 'months' | 'years';
   monthlyPayment?: number;
-  // For revolving credit
-  minimumPaymentPercentage?: number;
-  minimumPaymentAmount?: number;
 }

@@ -33,8 +33,8 @@ const DebtDashboard: React.FC = () => {
       accountType: 'credit_card',
       startDate: new Date('2023-01-15'),
       isRevolvingCredit: true,
-      minimumPaymentPercentage: 2,
-      minimumPaymentAmount: 25,
+      loanTerm: 24,
+      termUnit: 'months',
       interestPaidToDate: 1250,
       paymentDueDate: new Date(new Date().getFullYear(), new Date().getMonth(), 15)
     },
@@ -85,8 +85,8 @@ const DebtDashboard: React.FC = () => {
     accountType: 'credit_card',
     startDate: new Date(),
     isRevolvingCredit: true,
-    minimumPaymentPercentage: 2,
-    minimumPaymentAmount: 25
+    loanTerm: 24,
+    termUnit: 'months'
   });
 
   const accountTypeIcons = {
@@ -108,6 +108,19 @@ const DebtDashboard: React.FC = () => {
   };
 
   const availableColors = ['#EF4444', '#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#14B8A6', '#F97316'];
+
+  // Calculate monthly payment based on loan terms
+  const calculateMonthlyPayment = (balance: number, rate: number, term: number, termUnit: 'months' | 'years') => {
+    const monthlyRate = rate / 100 / 12;
+    const numberOfPayments = termUnit === 'years' ? term * 12 : term;
+    
+    if (monthlyRate === 0) {
+      return balance / numberOfPayments;
+    }
+    
+    return balance * (monthlyRate * Math.pow(1 + monthlyRate, numberOfPayments)) / 
+           (Math.pow(1 + monthlyRate, numberOfPayments) - 1);
+  };
 
   // Calculate dashboard metrics
   const dashboardMetrics = useMemo(() => {
@@ -154,20 +167,7 @@ const DebtDashboard: React.FC = () => {
     rate: account.interestRate
   }));
 
-  const calculateMinimumPayment = (balance: number, rate: number, isRevolving: boolean, minPercent?: number, minAmount?: number) => {
-    if (!isRevolving) return 0;
-    
-    const percentagePayment = balance * ((minPercent || 2) / 100);
-    const minimumRequired = minAmount || 25;
-    
-    return Math.max(percentagePayment, minimumRequired);
-  };
-
   const calculatePayoffProjection = (account: DebtAccount) => {
-    if (!account.isRevolvingCredit) {
-      return account.payoffDate || null;
-    }
-
     let balance = account.currentBalance;
     let months = 0;
     const monthlyRate = account.interestRate / 100 / 12;
@@ -200,19 +200,21 @@ const DebtDashboard: React.FC = () => {
   };
 
   const handleAddAccount = () => {
-    if (!formData.name || !formData.currentBalance) return;
+    if (!formData.name || !formData.currentBalance || !formData.loanTerm) return;
+
+    // Calculate monthly payment based on loan terms
+    const calculatedPayment = calculateMonthlyPayment(
+      formData.currentBalance,
+      formData.interestRate,
+      formData.loanTerm,
+      formData.termUnit
+    );
 
     const newAccount: DebtAccount = {
       id: Date.now().toString(),
       name: formData.name,
       currentBalance: formData.currentBalance,
-      monthlyPayment: formData.monthlyPayment || calculateMinimumPayment(
-        formData.currentBalance,
-        formData.interestRate,
-        formData.isRevolvingCredit,
-        formData.minimumPaymentPercentage,
-        formData.minimumPaymentAmount
-      ),
+      monthlyPayment: formData.monthlyPayment || calculatedPayment,
       interestRate: formData.interestRate,
       color: availableColors[debtAccounts.length % availableColors.length],
       accountType: formData.accountType,
@@ -221,23 +223,19 @@ const DebtDashboard: React.FC = () => {
       loanTerm: formData.loanTerm,
       termUnit: formData.termUnit,
       originalBalance: formData.currentBalance,
-      minimumPaymentPercentage: formData.minimumPaymentPercentage,
-      minimumPaymentAmount: formData.minimumPaymentAmount,
       interestPaidToDate: 0,
       paymentDueDate: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1)
     };
 
-    // Calculate payoff date for term loans
-    if (!newAccount.isRevolvingCredit && newAccount.loanTerm) {
-      const payoffDate = new Date(newAccount.startDate);
-      if (newAccount.termUnit === 'years') {
-        payoffDate.setFullYear(payoffDate.getFullYear() + newAccount.loanTerm);
-      } else {
-        payoffDate.setMonth(payoffDate.getMonth() + newAccount.loanTerm);
-      }
-      newAccount.payoffDate = payoffDate;
-      newAccount.remainingTerm = newAccount.loanTerm * (newAccount.termUnit === 'years' ? 12 : 1);
+    // Calculate payoff date based on loan term
+    const payoffDate = new Date(newAccount.startDate);
+    if (newAccount.termUnit === 'years') {
+      payoffDate.setFullYear(payoffDate.getFullYear() + newAccount.loanTerm);
+    } else {
+      payoffDate.setMonth(payoffDate.getMonth() + newAccount.loanTerm);
     }
+    newAccount.payoffDate = payoffDate;
+    newAccount.remainingTerm = newAccount.loanTerm * (newAccount.termUnit === 'years' ? 12 : 1);
 
     setDebtAccounts([...debtAccounts, newAccount]);
     setFormData({
@@ -247,8 +245,8 @@ const DebtDashboard: React.FC = () => {
       accountType: 'credit_card',
       startDate: new Date(),
       isRevolvingCredit: true,
-      minimumPaymentPercentage: 2,
-      minimumPaymentAmount: 25
+      loanTerm: 24,
+      termUnit: 'months'
     });
     setShowAddForm(false);
   };
@@ -495,88 +493,49 @@ const DebtDashboard: React.FC = () => {
               </div>
             </div>
 
-            {/* Conditional fields based on account type */}
-            {formData.isRevolvingCredit ? (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Monthly Payment
-                  </label>
-                  <input
-                    type="number"
-                    value={formData.monthlyPayment || ''}
-                    onChange={(e) => setFormData({ ...formData, monthlyPayment: parseFloat(e.target.value) || 0 })}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                    placeholder="0.00"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Min Payment %
-                  </label>
-                  <input
-                    type="number"
-                    step="0.1"
-                    value={formData.minimumPaymentPercentage || ''}
-                    onChange={(e) => setFormData({ ...formData, minimumPaymentPercentage: parseFloat(e.target.value) || 0 })}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                    placeholder="2.0"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Min Payment Amount
-                  </label>
-                  <input
-                    type="number"
-                    value={formData.minimumPaymentAmount || ''}
-                    onChange={(e) => setFormData({ ...formData, minimumPaymentAmount: parseFloat(e.target.value) || 0 })}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                    placeholder="25.00"
-                  />
-                </div>
+            {/* Loan Term Fields */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Loan Term
+                </label>
+                <input
+                  type="number"
+                  value={formData.loanTerm || ''}
+                  onChange={(e) => setFormData({ ...formData, loanTerm: parseFloat(e.target.value) || 0 })}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                  placeholder="24"
+                />
               </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Loan Term
-                  </label>
-                  <input
-                    type="number"
-                    value={formData.loanTerm || ''}
-                    onChange={(e) => setFormData({ ...formData, loanTerm: parseFloat(e.target.value) || 0 })}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                    placeholder="60"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Term Unit
-                  </label>
-                  <select
-                    value={formData.termUnit || 'months'}
-                    onChange={(e) => setFormData({ ...formData, termUnit: e.target.value as 'months' | 'years' })}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                  >
-                    <option value="months">Months</option>
-                    <option value="years">Years</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Monthly Payment
-                  </label>
-                  <input
-                    type="number"
-                    value={formData.monthlyPayment || ''}
-                    onChange={(e) => setFormData({ ...formData, monthlyPayment: parseFloat(e.target.value) || 0 })}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                    placeholder="0.00"
-                  />
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Term Unit
+                </label>
+                <select
+                  value={formData.termUnit || 'months'}
+                  onChange={(e) => setFormData({ ...formData, termUnit: e.target.value as 'months' | 'years' })}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                >
+                  <option value="months">Months</option>
+                  <option value="years">Years</option>
+                </select>
               </div>
-            )}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Monthly Payment (Optional)
+                </label>
+                <input
+                  type="number"
+                  value={formData.monthlyPayment || ''}
+                  onChange={(e) => setFormData({ ...formData, monthlyPayment: parseFloat(e.target.value) || 0 })}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                  placeholder="Auto-calculated"
+                />
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  Leave blank to auto-calculate based on loan term
+                </p>
+              </div>
+            </div>
 
             <div className="flex gap-2">
               <button
@@ -616,7 +575,7 @@ const DebtDashboard: React.FC = () => {
                         {account.name}
                       </h4>
                       <p className="text-sm text-gray-500 dark:text-gray-400">
-                        {accountTypeLabels[account.accountType]}
+                        {accountTypeLabels[account.accountType]} • {account.loanTerm} {account.termUnit}
                       </p>
                     </div>
                   </div>
@@ -670,7 +629,7 @@ const DebtDashboard: React.FC = () => {
                       {formatCurrency(account.interestPaidToDate, currency.code)}
                     </p>
                   </div>
-                  {!account.isRevolvingCredit && account.remainingTerm && (
+                  {account.remainingTerm && (
                     <div>
                       <p className="text-sm text-gray-500 dark:text-gray-400">Remaining Term</p>
                       <p className="text-lg font-semibold text-gray-900 dark:text-white">
