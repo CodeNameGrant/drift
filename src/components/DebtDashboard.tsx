@@ -16,7 +16,7 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import { DebtAccount, DebtAccountFormData } from '../types';
-import { formatCurrency, formatDate, formatPercentage } from '../utils/calculations';
+import { formatCurrency, formatDate, formatPercentage } from '../utils';
 import { useCurrency } from '../context/CurrencyContext';
 
 const DebtDashboard: React.FC = () => {
