@@ -19,26 +19,7 @@ import {
   Area,
   ReferenceLine
 } from 'recharts';
-import { 
-  TrendingDown, 
-  PieChart as PieChartIcon, 
-  BarChart3, 
-  Activity, 
-  Scatter3D,
-  Calendar,
-  Filter,
-  Eye,
-  EyeOff,
-  RefreshCw,
-  Target,
-  DollarSign,
-  Percent,
-  Clock,
-  AlertTriangle,
-  CheckCircle2,
-  ArrowUp,
-  ArrowDown
-} from 'lucide-react';
+import { TrendingDown, PieChart as PieChartIcon, BarChart3, Activity, ScatterChart as Scatter3D, Calendar, Filter, Eye, EyeOff, RefreshCw, Target, DollarSign, Percent, Clock, AlertTriangle, CheckCircle2, ArrowUp, ArrowDown } from 'lucide-react';
 import { formatCurrency, formatDate, formatPercentage } from '../utils';
 import { useCurrency } from '../context/CurrencyContext';
 import { useDebtAccounts } from '../hooks';
