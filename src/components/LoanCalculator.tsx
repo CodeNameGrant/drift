@@ -5,7 +5,7 @@ import DebtVisualization from './DebtVisualization';
 import DebtDashboard from './DebtDashboard';
 import LoanAccountDashboard from './LoanAccountDashboard';
 import { LoanFormData, LoanResult } from '../types';
-import { calculateLoan } from '../utils/calculations';
+import { calculateLoan } from '../utils';
 import { Calculator, TrendingDown, Target, BarChart3, CreditCard } from 'lucide-react';
 
 const LoanCalculator: React.FC = () => {
