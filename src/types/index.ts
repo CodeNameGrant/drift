@@ -124,4 +124,4 @@ export type Theme = 'light' | 'dark';
 /**
  * Tab navigation options for the main application
  */
-export type TabType = 'dashboard' | 'visualization' | 'calculator' | 'accounts';
+export type TabType = 'overview' | 'dashboard' | 'visualization' | 'calculator' | 'accounts';

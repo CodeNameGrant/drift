@@ -3,10 +3,11 @@ import LoanForm from './LoanForm';
 import ResultsDisplay from './ResultsDisplay';
 import DebtVisualization from '../DebtVisualization';
 import DebtDashboard from '../DebtDashboard';
+import DebtOverviewDashboard from '../DebtOverviewDashboard';
 import LoanAccountDashboard from '../LoanAccountDashboard';
 import type { LoanFormData, LoanResult, TabType } from '../../types';
 import { useLoanCalculation } from '../../hooks';
-import { Calculator, TrendingDown, Target, CreditCard } from 'lucide-react';
+import { Calculator, TrendingDown, Target, CreditCard, BarChart3 } from 'lucide-react';
 
 /**
  * Main loan calculator component that manages tabs and loan calculations
@@ -15,7 +16,7 @@ import { Calculator, TrendingDown, Target, CreditCard } from 'lucide-react';
 const LoanCalculator: React.FC = () => {
   const [formData, setFormData] = useState<LoanFormData | null>(null);
   const [isCalculated, setIsCalculated] = useState(false);
-  const [activeTab, setActiveTab] = useState<TabType>('dashboard');
+  const [activeTab, setActiveTab] = useState<TabType>('overview');
 
   // Use custom hook for loan calculations with memoization
   const result = useLoanCalculation(formData);
@@ -39,7 +40,8 @@ const LoanCalculator: React.FC = () => {
    * Tab configuration for navigation
    */
   const tabs = [
-    { id: 'dashboard' as const, label: 'Debt Dashboard', icon: Target },
+    { id: 'overview' as const, label: 'Overview Dashboard', icon: BarChart3 },
+    { id: 'dashboard' as const, label: 'Debt Management', icon: Target },
     { id: 'accounts' as const, label: 'Loan Accounts', icon: CreditCard },
     { id: 'visualization' as const, label: 'Debt Visualization', icon: TrendingDown },
     { id: 'calculator' as const, label: 'Loan Calculator', icon: Calculator },
@@ -59,28 +61,32 @@ const LoanCalculator: React.FC = () => {
       
       {/* Tab Navigation */}
       <div className="flex justify-center mb-8">
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-1 shadow-lg">
-          {tabs.map(({ id, label, icon: Icon }) => (
-            <button
-              key={id}
-              onClick={() => handleTabChange(id)}
-              className={`flex items-center gap-2 px-6 py-3 rounded-lg transition-all duration-200 ${
-                activeTab === id
-                  ? 'bg-primary text-white shadow-md'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-              }`}
-              aria-pressed={activeTab === id}
-              aria-label={`Switch to ${label} tab`}
-            >
-              <Icon className="h-5 w-5" />
-              {label}
-            </button>
-          ))}
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-1 shadow-lg overflow-x-auto">
+          <div className="flex">
+            {tabs.map(({ id, label, icon: Icon }) => (
+              <button
+                key={id}
+                onClick={() => handleTabChange(id)}
+                className={`flex items-center gap-2 px-4 py-3 rounded-lg transition-all duration-200 whitespace-nowrap ${
+                  activeTab === id
+                    ? 'bg-primary text-white shadow-md'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                }`}
+                aria-pressed={activeTab === id}
+                aria-label={`Switch to ${label} tab`}
+              >
+                <Icon className="h-5 w-5" />
+                <span className="hidden sm:inline">{label}</span>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
       {/* Tab Content */}
       <div className="min-h-[600px]">
+        {activeTab === 'overview' && <DebtOverviewDashboard />}
+        
         {activeTab === 'dashboard' && <DebtDashboard />}
         
         {activeTab === 'accounts' && <LoanAccountDashboard />}

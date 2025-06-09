@@ -3,6 +3,7 @@ export { default as LoanForm } from './LoanCalculator/LoanForm';
 export { default as ResultsDisplay } from './LoanCalculator/ResultsDisplay';
 export { default as DebtDashboard } from './DebtDashboard';
 export { default as DebtVisualization } from './DebtVisualization';
+export { default as DebtOverviewDashboard } from './DebtOverviewDashboard';
 export { default as LoanAccountDashboard } from './LoanAccountDashboard';
 export { default as ThemeToggle } from './UI/ThemeToggle';
 export { default as GitHubLink } from './UI/GitHubLink';
