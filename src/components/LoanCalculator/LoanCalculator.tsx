@@ -1,9 +1,9 @@
 import React, { useState, useCallback } from 'react';
 import LoanForm from './LoanForm';
 import ResultsDisplay from './ResultsDisplay';
-import DebtVisualization from '../../DebtVisualization';
-import DebtDashboard from '../../DebtDashboard';
-import LoanAccountDashboard from '../../LoanAccountDashboard';
+import DebtVisualization from '../DebtVisualization';
+import DebtDashboard from '../DebtDashboard';
+import LoanAccountDashboard from '../LoanAccountDashboard';
 import type { LoanFormData, LoanResult, TabType } from '../../types';
 import { useLoanCalculation } from '../../hooks';
 import { Calculator, TrendingDown, Target, CreditCard } from 'lucide-react';
