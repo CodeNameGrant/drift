@@ -1,9 +1,9 @@
 export { default as LoanCalculator } from './LoanCalculator/LoanCalculator';
 export { default as LoanForm } from './LoanCalculator/LoanForm';
 export { default as ResultsDisplay } from './LoanCalculator/ResultsDisplay';
-export { default as DebtDashboard } from './DebtManagement/DebtDashboard';
-export { default as DebtVisualization } from './DebtManagement/DebtVisualization';
-export { default as LoanAccountDashboard } from './LoanAccounts/LoanAccountDashboard';
+export { default as DebtDashboard } from './DebtDashboard';
+export { default as DebtVisualization } from './DebtVisualization';
+export { default as LoanAccountDashboard } from './LoanAccountDashboard';
 export { default as ThemeToggle } from './UI/ThemeToggle';
 export { default as GitHubLink } from './UI/GitHubLink';
 export { default as CurrencySelector } from './UI/CurrencySelector';
