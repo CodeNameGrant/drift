@@ -1,31 +1,64 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
+import type { Theme } from '../types';
+import { useLocalStorage } from './useLocalStorage';
+import { STORAGE_KEYS } from '../utils/constants';
 
-type Theme = 'light' | 'dark';
-
+/**
+ * Custom hook for managing application theme with system preference detection
+ * @returns Object containing current theme and toggle function
+ */
 export const useTheme = () => {
-  // Check if user has a saved preference or use system preference
+  /**
+   * Get initial theme from localStorage or system preference
+   */
   const getInitialTheme = (): Theme => {
-    const savedTheme = localStorage.getItem('theme') as Theme;
-    if (savedTheme) return savedTheme;
+    // Check for saved preference first
+    const savedTheme = localStorage.getItem(STORAGE_KEYS.THEME) as Theme;
+    if (savedTheme && (savedTheme === 'light' || savedTheme === 'dark')) {
+      return savedTheme;
+    }
     
+    // Fall back to system preference
     const userPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     return userPrefersDark ? 'dark' : 'light';
   };
 
-  const [theme, setTheme] = useState<Theme>(getInitialTheme);
+  const [theme, setTheme] = useLocalStorage<Theme>(STORAGE_KEYS.THEME, getInitialTheme());
 
+  /**
+   * Apply theme changes to document element
+   */
   useEffect(() => {
-    // Update HTML element class when theme changes
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
+    const root = document.documentElement;
     
-    // Save preference to localStorage
-    localStorage.setItem('theme', theme);
+    if (theme === 'dark') {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
   }, [theme]);
 
+  /**
+   * Listen for system theme changes
+   */
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    
+    const handleChange = (e: MediaQueryListEvent) => {
+      // Only update if user hasn't manually set a preference
+      const savedTheme = localStorage.getItem(STORAGE_KEYS.THEME);
+      if (!savedTheme) {
+        setTheme(e.matches ? 'dark' : 'light');
+      }
+    };
+
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, [setTheme]);
+
+  /**
+   * Toggle between light and dark themes
+   */
   const toggleTheme = () => {
     setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
   };

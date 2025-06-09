@@ -1,25 +1,36 @@
-import { LoanFormData, LoanResult, AmortizationPayment } from '../types';
+import type { LoanFormData, LoanResult, AmortizationPayment } from '../types';
 
+/**
+ * Calculate comprehensive loan information including payments, interest, and amortization
+ * @param formData - Loan parameters from the form
+ * @returns Complete loan calculation results
+ */
 export const calculateLoan = (formData: LoanFormData): LoanResult => {
   const { loanAmount, interestRate, loanTerm, termUnit, startDate } = formData;
   
+  // Convert to monthly values
   const monthlyInterestRate = interestRate / 100 / 12;
   const numberOfPayments = termUnit === 'years' ? loanTerm * 12 : loanTerm;
   
+  // Calculate monthly payment using standard loan formula
   const monthlyPayment = monthlyInterestRate === 0 
     ? loanAmount / numberOfPayments
     : loanAmount * (monthlyInterestRate * Math.pow(1 + monthlyInterestRate, numberOfPayments)) / 
       (Math.pow(1 + monthlyInterestRate, numberOfPayments) - 1);
   
+  // Calculate totals
   const totalInterest = (monthlyPayment * numberOfPayments) - loanAmount;
   const totalAmountRepaid = loanAmount + totalInterest;
   
+  // Calculate payoff date
   const payoffDate = new Date(startDate);
   payoffDate.setMonth(payoffDate.getMonth() + numberOfPayments);
 
+  // Calculate additional metrics
   const effectiveAnnualRate = (Math.pow(1 + monthlyInterestRate, 12) - 1) * 100;
   const costPercentage = (totalInterest / loanAmount) * 100;
 
+  // Generate amortization schedule
   const amortizationSchedule = generateAmortizationSchedule(
     loanAmount,
     monthlyInterestRate,
@@ -42,6 +53,15 @@ export const calculateLoan = (formData: LoanFormData): LoanResult => {
   };
 };
 
+/**
+ * Generate amortization schedule showing payment breakdown over time
+ * @param principal - Initial loan amount
+ * @param monthlyRate - Monthly interest rate (decimal)
+ * @param monthlyPayment - Fixed monthly payment amount
+ * @param totalPayments - Total number of payments
+ * @param startDate - Loan start date
+ * @returns Array of payment details for first and last few payments
+ */
 const generateAmortizationSchedule = (
   principal: number,
   monthlyRate: number,
@@ -58,6 +78,7 @@ const generateAmortizationSchedule = (
     const principalPaid = monthlyPayment - interest;
     balance = Math.max(0, balance - principalPaid);
 
+    // Only include first 3 and last 3 payments to keep data manageable
     if (i <= 3 || i > totalPayments - 3) {
       schedule.push({
         paymentNumber: i,
@@ -74,72 +95,5 @@ const generateAmortizationSchedule = (
   return schedule;
 };
 
-export const formatNumber = (amount: number): string => {
-  return new Intl.NumberFormat(undefined, {
-    style: 'decimal',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  }).format(amount);
-};
-
-export const formatCurrency = (amount: number, currencyCode: string = 'USD', showDecimals = true): string => {
-  const options: Intl.NumberFormatOptions = {
-    style: 'currency',
-    currency: currencyCode,
-    currencyDisplay: 'narrowSymbol'
-  };
-
-  if (!showDecimals) {
-    options.minimumFractionDigits = 0;
-    options.maximumFractionDigits = 0;
-  }
-
-  return new Intl.NumberFormat(undefined, options).format(amount);
-};
-
-export const formatDate = (date: Date): string => {
-  return new Intl.DateTimeFormat(undefined, {
-    day: '2-digit',
-    month: 'long',
-    year: 'numeric'
-  }).format(date);
-};
-
-export const formatPercentage = (value: number): string => {
-  return new Intl.NumberFormat(undefined, {
-    style: 'percent',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  }).format(value / 100);
-};
-
-export const validateForm = (data: Partial<LoanFormData>) => {
-  const errors: Record<string, string> = {};
-  
-  if (!data.loanAmount || data.loanAmount < 1) {
-    errors.loanAmount = 'Loan amount must be at least 1';
-  }
-  
-  if (!data.interestRate && data.interestRate !== 0) {
-    errors.interestRate = 'Interest rate is required';
-  } else if (data.interestRate < 0 || data.interestRate > 100) {
-    errors.interestRate = 'Interest rate must be between 0% and 100%';
-  }
-  
-  if (!data.loanTerm || data.loanTerm < 1) {
-    errors.loanTerm = data.termUnit === 'years' 
-      ? 'Term must be between 1-30 years' 
-      : 'Term must be between 1-360 months';
-  } else if (data.termUnit === 'years' && data.loanTerm > 30) {
-    errors.loanTerm = 'Term must be between 1-30 years';
-  } else if (data.termUnit === 'months' && data.loanTerm > 360) {
-    errors.loanTerm = 'Term must be between 1-360 months';
-  }
-  
-  return errors;
-};
-
-export const formatNumberWithCommas = (value: string | number): string => {
-  const digits = typeof value === 'number' ? value.toString() : value.replace(/\D/g, '');
-  return digits.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-};
+// Re-export validation function with new name for consistency
+export { validateLoanForm as validateForm } from './validators';

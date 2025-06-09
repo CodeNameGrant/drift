@@ -1,3 +1,6 @@
+/**
+ * Form data structure for loan calculations
+ */
 export interface LoanFormData {
   loanAmount: number;
   interestRate: number;
@@ -6,6 +9,9 @@ export interface LoanFormData {
   startDate: Date;
 }
 
+/**
+ * Individual payment in an amortization schedule
+ */
 export interface AmortizationPayment {
   paymentNumber: number;
   date: Date;
@@ -14,6 +20,9 @@ export interface AmortizationPayment {
   balance: number;
 }
 
+/**
+ * Complete loan calculation results
+ */
 export interface LoanResult {
   monthlyPayment: number;
   totalInterest: number;
@@ -27,12 +36,23 @@ export interface LoanResult {
   amortizationSchedule: AmortizationPayment[];
 }
 
+/**
+ * Form validation errors
+ */
 export interface FormErrors {
   loanAmount?: string;
   interestRate?: string;
   loanTerm?: string;
 }
 
+/**
+ * Debt account types supported by the system
+ */
+export type DebtAccountType = 'credit_card' | 'personal_loan' | 'mortgage' | 'auto_loan' | 'student_loan' | 'other';
+
+/**
+ * Complete debt account information
+ */
 export interface DebtAccount {
   id: string;
   name: string;
@@ -40,20 +60,21 @@ export interface DebtAccount {
   monthlyPayment: number;
   interestRate: number;
   color: string;
-  accountType: 'credit_card' | 'personal_loan' | 'mortgage' | 'auto_loan' | 'student_loan' | 'other';
+  accountType: DebtAccountType;
   startDate: Date;
   isRevolvingCredit: boolean;
-  // Loan term for all accounts
   loanTerm: number;
   termUnit: 'months' | 'years';
   originalBalance?: number;
-  // Calculated fields
   interestPaidToDate: number;
   paymentDueDate: Date;
   remainingTerm?: number;
   payoffDate?: Date;
 }
 
+/**
+ * Data structure for debt visualization charts
+ */
 export interface DebtVisualizationData {
   month: number;
   date: string;
@@ -62,21 +83,45 @@ export interface DebtVisualizationData {
   milestone?: string;
 }
 
+/**
+ * Milestone markers for debt repayment progress
+ */
 export interface Milestone {
   month: number;
   description: string;
   type: 'payoff' | 'halfway' | 'custom';
 }
 
+/**
+ * Form data for creating new debt accounts
+ */
 export interface DebtAccountFormData {
   name: string;
   currentBalance: number;
   interestRate: number;
-  accountType: DebtAccount['accountType'];
+  accountType: DebtAccountType;
   startDate: Date;
   isRevolvingCredit: boolean;
-  // Loan term for all accounts
   loanTerm: number;
   termUnit: 'months' | 'years';
   monthlyPayment?: number;
 }
+
+/**
+ * Currency information for internationalization
+ */
+export interface Currency {
+  code: string;
+  symbol: string;
+  name: string;
+}
+
+/**
+ * Theme configuration
+ */
+export type Theme = 'light' | 'dark';
+
+/**
+ * Tab navigation options for the main application
+ */
+export type TabType = 'dashboard' | 'visualization' | 'calculator' | 'accounts';

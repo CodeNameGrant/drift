@@ -1,32 +1,24 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-
-interface Currency {
-  code: string;
-  symbol: string;
-  name: string;
-}
-
-const currencies: Currency[] = [
-  { code: 'USD', symbol: '$', name: 'US Dollar' },
-  { code: 'EUR', symbol: '€', name: 'Euro' },
-  { code: 'GBP', symbol: '£', name: 'British Pound' },
-  { code: 'AUD', symbol: 'A$', name: 'Australian Dollar' },
-  { code: 'CAD', symbol: 'C$', name: 'Canadian Dollar' },
-  { code: 'JPY', symbol: '¥', name: 'Japanese Yen' },
-  { code: 'CHF', symbol: 'CHF', name: 'Swiss Franc' },
-  { code: 'NZD', symbol: 'NZ$', name: 'New Zealand Dollar' },
-  { code: 'ZAR', symbol: 'R', name: 'South African Rand' }
-];
+import React, { createContext, useContext, useEffect, ReactNode } from 'react';
+import type { Currency } from '../types';
+import { useLocalStorage } from '../hooks';
+import { SUPPORTED_CURRENCIES, STORAGE_KEYS } from '../utils/constants';
 
 interface CurrencyContextType {
+  /** Currently selected currency */
   currency: Currency;
+  /** Function to update the selected currency */
   setCurrency: (currency: Currency) => void;
-  currencies: Currency[];
+  /** Array of all supported currencies */
+  currencies: readonly Currency[];
 }
 
 const CurrencyContext = createContext<CurrencyContextType | undefined>(undefined);
 
-export const useCurrency = () => {
+/**
+ * Hook to access currency context
+ * @throws Error if used outside of CurrencyProvider
+ */
+export const useCurrency = (): CurrencyContextType => {
   const context = useContext(CurrencyContext);
   if (!context) {
     throw new Error('useCurrency must be used within a CurrencyProvider');
@@ -34,14 +26,12 @@ export const useCurrency = () => {
   return context;
 };
 
+/**
+ * Get default currency based on user's locale or fallback to USD
+ */
 const getDefaultCurrency = (): Currency => {
-  const savedCurrency = localStorage.getItem('currency');
-  if (savedCurrency) {
-    return JSON.parse(savedCurrency);
-  }
-
   const userLocale = navigator.language;
-  const currencyByLocale: { [key: string]: string } = {
+  const currencyByLocale: Record<string, string> = {
     'en-US': 'USD',
     'en-GB': 'GBP',
     'en-AU': 'AUD',
@@ -53,18 +43,31 @@ const getDefaultCurrency = (): Currency => {
   };
 
   const currencyCode = currencyByLocale[userLocale] || 'USD';
-  return currencies.find(c => c.code === currencyCode) || currencies[0];
+  return SUPPORTED_CURRENCIES.find(c => c.code === currencyCode) || SUPPORTED_CURRENCIES[0];
 };
 
-export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [currency, setCurrency] = useState<Currency>(getDefaultCurrency);
+interface CurrencyProviderProps {
+  children: ReactNode;
+}
 
-  useEffect(() => {
-    localStorage.setItem('currency', JSON.stringify(currency));
-  }, [currency]);
+/**
+ * Currency context provider component
+ * Manages currency selection with localStorage persistence
+ */
+export const CurrencyProvider: React.FC<CurrencyProviderProps> = ({ children }) => {
+  const [currency, setCurrency] = useLocalStorage<Currency>(
+    STORAGE_KEYS.CURRENCY,
+    getDefaultCurrency()
+  );
+
+  const contextValue: CurrencyContextType = {
+    currency,
+    setCurrency,
+    currencies: SUPPORTED_CURRENCIES
+  };
 
   return (
-    <CurrencyContext.Provider value={{ currency, setCurrency, currencies }}>
+    <CurrencyContext.Provider value={contextValue}>
       {children}
     </CurrencyContext.Provider>
   );
