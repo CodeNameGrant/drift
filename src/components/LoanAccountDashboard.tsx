@@ -15,7 +15,7 @@ import {
   Unlink
 } from 'lucide-react';
 import { loanAccountManager, LoanAccount, PaymentRecord } from '../services/LoanAccountManager';
-import { formatCurrency, formatDate, formatPercentage } from '../utils/calculations';
+import { formatCurrency, formatDate, formatPercentage } from '../utils';
 import { useCurrency } from '../context/CurrencyContext';
 
 const LoanAccountDashboard: React.FC = () => {
