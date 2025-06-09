@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine, Dot } from 'recharts';
 import { TrendingDown, Calendar, Target, Plus, Trash2, Edit3 } from 'lucide-react';
 import { DebtAccount, DebtVisualizationData, Milestone } from '../types';
-import { formatCurrency, formatDate } from '../utils/calculations';
+import { formatCurrency, formatDate } from '../utils';
 import { useCurrency } from '../context/CurrencyContext';
 
 const DebtVisualization: React.FC = () => {
