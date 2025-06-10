@@ -345,7 +345,7 @@ const LoanForm: React.FC<LoanFormProps> = ({ onCalculate }) => {
           data-testid="calculate-button"
         >
           <Calculator className="h-5 w-5" />
-          Calculate Loan Scenarios
+          Calculate
         </button>
       </div>
 
