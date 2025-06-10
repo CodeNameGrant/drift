@@ -3,3 +3,64 @@ For all designs I ask you to make, have them be beautiful, not cookie cutter. Ma
 By default, this template supports JSX syntax with Tailwind CSS classes, React hooks, and Lucide React for icons. Do not install other packages for UI themes, icons, etc unless absolutely necessary or I request them.
 
 Use icons from lucide-react for logos.
+
+Create production-ready React components following these comprehensive guidelines:
+
+1. Component Structure:
+- Create a new component
+- Follow TypeScript best practices
+- Implement proper prop interfaces
+- Include comprehensive JSDoc documentation
+- Add necessary imports
+- Structure the component following React best practices
+- Style using Tailwind CSS
+- Add accessibility features
+- Include error handling
+- Implement performance optimizations
+- Add testing attributes
+
+Requirements:
+
+- Use functional components with TypeScript
+- Include detailed JSDoc comments
+- Follow the specified directory structure
+- Keep components modular and under 250 lines
+- Use Tailwind CSS for styling
+- Implement Lucide React icons
+- Add proper accessibility attributes
+- Include data-testid attributes
+- Follow clean code principles
+- Optimize for performance
+- Include error boundaries
+- Use semantic HTML
+- Follow consistent naming conventions
+- Implement proper type checking
+- Add inline comments for complex logic
+- Extract reusable logic into custom hooks
+- Use composition patterns
+- Make components flexible and reusable
+- Follow accessibility guidelines (WCAG)
+- Include proper keyboard navigation
+- Add responsive design
+- Implement loading states
+- Handle error states gracefully
+- Add proper aria labels
+- Include focus management
+- Optimize for SEO where applicable
+- Add proper event handling
+- Include form validation where needed
+- Implement proper state management
+- Add transition animations where appropriate
+- Include proper color contrast
+- Make components theme-aware
+- Add proper spacing and layout
+- Include proper documentation
+- Follow consistent file structure
+- Add proper testing setup
+- Include performance monitoring
+- Implement proper data fetching patterns
+- Add proper loading indicators
+- Include proper error messages
+- Follow security best practices
+
+Please provide the specific component(s) you'd like me to create following these guidelines.
