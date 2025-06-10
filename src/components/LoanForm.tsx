@@ -2,15 +2,15 @@ import React, { useState } from 'react';
 import { LoanFormData, FormErrors } from '../types';
 import { validateForm, formatCurrency } from '../utils/calculations';
 import { useCurrency } from '../context/CurrencyContext';
-import { Calculator, Plus } from 'lucide-react';
+import { Calculator, Plus, DollarSign, Percent, Calendar, Clock } from 'lucide-react';
 
 interface LoanFormProps {
   onCalculate: (data: LoanFormData) => void;
 }
 
 /**
- * Enhanced loan form component with extra payment simulation inputs
- * Includes comprehensive validation and accessibility features
+ * Enhanced space-efficient loan form component with multi-column layout
+ * Features logical field grouping, responsive design, and comprehensive validation
  */
 const LoanForm: React.FC<LoanFormProps> = ({ onCalculate }) => {
   const today = new Date();
@@ -143,214 +143,241 @@ const LoanForm: React.FC<LoanFormProps> = ({ onCalculate }) => {
     transition duration-200
   `;
 
+  /**
+   * Render form field with icon and label
+   */
+  const renderField = (
+    name: string,
+    label: string,
+    icon: React.ReactNode,
+    type: string = 'text',
+    placeholder?: string,
+    min?: string,
+    max?: string,
+    step?: string
+  ) => (
+    <div className="space-y-2">
+      <label htmlFor={name} className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+        {icon}
+        {label}
+      </label>
+      <div className="relative">
+        <input
+          type={type}
+          name={name}
+          id={name}
+          value={
+            name === 'loanAmount' || name === 'extraPayment1' || name === 'extraPayment2'
+              ? formatCurrency(formData[name as keyof LoanFormData] as number, currency.code, false)
+              : name === 'startDate'
+              ? (formData[name] as Date).toISOString().split('T')[0]
+              : formData[name as keyof LoanFormData] || ''
+          }
+          onChange={handleInputChange}
+          onBlur={type !== 'date' ? handleBlur : undefined}
+          onPaste={name.includes('Amount') || name.includes('Payment') ? handlePaste : undefined}
+          min={min}
+          max={max}
+          step={step}
+          className={inputClasses(name)}
+          placeholder={placeholder}
+          aria-describedby={errors[name as keyof FormErrors] ? `${name}-error` : undefined}
+          data-testid={`${name.replace(/([A-Z])/g, '-$1').toLowerCase()}-input`}
+        />
+      </div>
+      {touched[name] && errors[name as keyof FormErrors] && (
+        <p id={`${name}-error`} className="text-sm text-red-500" role="alert">
+          {errors[name as keyof FormErrors]}
+        </p>
+      )}
+    </div>
+  );
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 w-full max-w-md" data-testid="loan-form">
-      <div className="space-y-4">
-        {/* Loan Amount */}
-        <div>
-          <label htmlFor="loanAmount" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Loan Amount
-          </label>
-          <div className="relative mt-1 rounded-md shadow-sm">
-            <input
-              type="text"
-              name="loanAmount"
-              id="loanAmount"
-              value={formatCurrency(formData.loanAmount, currency.code, false)}
-              onChange={handleInputChange}
-              onPaste={handlePaste}
-              onBlur={handleBlur}
-              className={inputClasses('loanAmount')}
-              placeholder="Enter loan amount"
-              aria-describedby={errors.loanAmount ? 'loanAmount-error' : undefined}
-              data-testid="loan-amount-input"
-            />
+    <form onSubmit={handleSubmit} className="space-y-8 w-full" data-testid="loan-form">
+      {/* Primary Loan Details Section */}
+      <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-6">
+        <h3 className="flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white mb-6">
+          <DollarSign className="h-5 w-5 text-primary" />
+          Loan Details
+        </h3>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Left Column */}
+          <div className="space-y-6">
+            {renderField(
+              'loanAmount',
+              'Loan Amount',
+              <DollarSign className="h-4 w-4 text-gray-500" />,
+              'text',
+              'Enter loan amount'
+            )}
+            
+            {renderField(
+              'interestRate',
+              'Annual Interest Rate (%)',
+              <Percent className="h-4 w-4 text-gray-500" />,
+              'number',
+              'Enter interest rate',
+              '0.1',
+              '100',
+              '0.1'
+            )}
           </div>
-          {touched.loanAmount && errors.loanAmount && (
-            <p id="loanAmount-error" className="mt-1 text-sm text-red-500" role="alert">
-              {errors.loanAmount}
-            </p>
-          )}
-        </div>
 
-        {/* Interest Rate */}
-        <div>
-          <label htmlFor="interestRate" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Annual Interest Rate (%)
-          </label>
-          <div className="relative mt-1 rounded-md shadow-sm">
-            <input
-              type="number"
-              name="interestRate"
-              id="interestRate"
-              value={formData.interestRate || ''}
-              onChange={handleInputChange}
-              onBlur={handleBlur}
-              min="0.1"
-              max="100"
-              step="0.1"
-              className={inputClasses('interestRate')}
-              placeholder="Enter interest rate"
-              aria-describedby={errors.interestRate ? 'interestRate-error' : undefined}
-              data-testid="interest-rate-input"
-            />
-          </div>
-          {touched.interestRate && errors.interestRate && (
-            <p id="interestRate-error" className="mt-1 text-sm text-red-500" role="alert">
-              {errors.interestRate}
-            </p>
-          )}
-        </div>
-
-        {/* Loan Term */}
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label htmlFor="loanTerm" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Loan Term
-            </label>
-            <div className="relative mt-1 rounded-md shadow-sm">
-              <input
-                type="number"
-                name="loanTerm"
-                id="loanTerm"
-                value={formData.loanTerm || ''}
-                onChange={handleInputChange}
-                onBlur={handleBlur}
-                min="1"
-                max={formData.termUnit === 'years' ? 30 : 360}
-                className={inputClasses('loanTerm')}
-                placeholder={formData.termUnit === 'years' ? "1-30" : "1-360"}
-                aria-describedby={errors.loanTerm ? 'loanTerm-error' : undefined}
-                data-testid="loan-term-input"
-              />
-            </div>
-          </div>
-          <div>
-            <label htmlFor="termUnit" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Term Unit
-            </label>
-            <select
-              name="termUnit"
-              id="termUnit"
-              value={formData.termUnit}
-              onChange={handleInputChange}
-              className="block w-full rounded-lg py-3 px-4 text-gray-900 bg-white dark:bg-gray-800 dark:text-white border border-gray-300 dark:border-gray-700 focus:border-primary focus:ring-primary focus:outline-none focus:ring-2 transition duration-200"
-              data-testid="term-unit-select"
-            >
-              <option value="years">Years</option>
-              <option value="months">Months</option>
-            </select>
-          </div>
-        </div>
-        {touched.loanTerm && errors.loanTerm && (
-          <p id="loanTerm-error" className="mt-1 text-sm text-red-500" role="alert">
-            {errors.loanTerm}
-          </p>
-        )}
-
-        {/* Start Date */}
-        <div>
-          <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Start Date
-          </label>
-          <div className="relative mt-1 rounded-md shadow-sm">
-            <input
-              type="date"
-              name="startDate"
-              id="startDate"
-              value={formData.startDate.toISOString().split('T')[0]}
-              onChange={handleInputChange}
-              className="block w-full rounded-lg py-3 px-4 text-gray-900 bg-white dark:bg-gray-800 dark:text-white border border-gray-300 dark:border-gray-700 focus:border-primary focus:ring-primary focus:outline-none focus:ring-2 transition duration-200"
-              data-testid="start-date-input"
-            />
-          </div>
-        </div>
-
-        {/* Extra Payment Simulations */}
-        <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
-          <div className="flex items-center gap-2 mb-4">
-            <Plus className="h-5 w-5 text-primary" />
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-              Extra Payment Simulations
-            </h3>
-          </div>
-          
-          <div className="space-y-4">
-            {/* Extra Payment 1 */}
-            <div>
-              <label htmlFor="extraPayment1" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Simulation 1: Extra Monthly Payment
+          {/* Right Column */}
+          <div className="space-y-6">
+            {/* Loan Term - Split into two columns */}
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                <Clock className="h-4 w-4 text-gray-500" />
+                Loan Term
               </label>
-              <div className="relative mt-1 rounded-md shadow-sm">
-                <input
-                  type="text"
-                  name="extraPayment1"
-                  id="extraPayment1"
-                  value={formatCurrency(formData.extraPayment1, currency.code, false)}
-                  onChange={handleInputChange}
-                  onPaste={handlePaste}
-                  onBlur={handleBlur}
-                  className={inputClasses('extraPayment1')}
-                  placeholder="Enter extra payment amount"
-                  aria-describedby={errors.extraPayment1 ? 'extraPayment1-error' : undefined}
-                  data-testid="extra-payment-1-input"
-                />
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <input
+                    type="number"
+                    name="loanTerm"
+                    id="loanTerm"
+                    value={formData.loanTerm || ''}
+                    onChange={handleInputChange}
+                    onBlur={handleBlur}
+                    min="1"
+                    max={formData.termUnit === 'years' ? 30 : 360}
+                    className={inputClasses('loanTerm')}
+                    placeholder={formData.termUnit === 'years' ? "1-30" : "1-360"}
+                    aria-describedby={errors.loanTerm ? 'loanTerm-error' : undefined}
+                    data-testid="loan-term-input"
+                  />
+                </div>
+                <div>
+                  <select
+                    name="termUnit"
+                    id="termUnit"
+                    value={formData.termUnit}
+                    onChange={handleInputChange}
+                    className="block w-full rounded-lg py-3 px-4 text-gray-900 bg-white dark:bg-gray-800 dark:text-white border border-gray-300 dark:border-gray-700 focus:border-primary focus:ring-primary focus:outline-none focus:ring-2 transition duration-200"
+                    data-testid="term-unit-select"
+                  >
+                    <option value="years">Years</option>
+                    <option value="months">Months</option>
+                  </select>
+                </div>
               </div>
-              {touched.extraPayment1 && errors.extraPayment1 && (
-                <p id="extraPayment1-error" className="mt-1 text-sm text-red-500" role="alert">
-                  {errors.extraPayment1}
+              {touched.loanTerm && errors.loanTerm && (
+                <p id="loanTerm-error" className="text-sm text-red-500" role="alert">
+                  {errors.loanTerm}
                 </p>
               )}
             </div>
 
-            {/* Extra Payment 2 */}
-            <div>
-              <label htmlFor="extraPayment2" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Simulation 2: Extra Monthly Payment
-              </label>
-              <div className="relative mt-1 rounded-md shadow-sm">
-                <input
-                  type="text"
-                  name="extraPayment2"
-                  id="extraPayment2"
-                  value={formatCurrency(formData.extraPayment2, currency.code, false)}
-                  onChange={handleInputChange}
-                  onPaste={handlePaste}
-                  onBlur={handleBlur}
-                  className={inputClasses('extraPayment2')}
-                  placeholder="Enter extra payment amount"
-                  aria-describedby={errors.extraPayment2 ? 'extraPayment2-error' : undefined}
-                  data-testid="extra-payment-2-input"
-                />
-              </div>
-              {touched.extraPayment2 && errors.extraPayment2 && (
-                <p id="extraPayment2-error" className="mt-1 text-sm text-red-500" role="alert">
-                  {errors.extraPayment2}
-                </p>
-              )}
-            </div>
+            {renderField(
+              'startDate',
+              'Start Date',
+              <Calendar className="h-4 w-4 text-gray-500" />,
+              'date'
+            )}
           </div>
         </div>
       </div>
 
+      {/* Extra Payment Simulations Section */}
+      <div className="bg-gradient-to-r from-green-50 to-blue-50 dark:from-gray-700/50 dark:to-gray-600/50 rounded-lg p-6">
+        <h3 className="flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white mb-6">
+          <Plus className="h-5 w-5 text-primary" />
+          Extra Payment Simulations
+        </h3>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Simulation 1 */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border-l-4 border-green-500">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-3 h-3 rounded-full bg-green-500" />
+              <h4 className="font-medium text-gray-900 dark:text-white">Simulation 1</h4>
+            </div>
+            {renderField(
+              'extraPayment1',
+              'Extra Monthly Payment',
+              <Plus className="h-4 w-4 text-gray-500" />,
+              'text',
+              'Enter extra payment amount'
+            )}
+          </div>
+
+          {/* Simulation 2 */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border-l-4 border-orange-500">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-3 h-3 rounded-full bg-orange-500" />
+              <h4 className="font-medium text-gray-900 dark:text-white">Simulation 2</h4>
+            </div>
+            {renderField(
+              'extraPayment2',
+              'Extra Monthly Payment',
+              <Plus className="h-4 w-4 text-gray-500" />,
+              'text',
+              'Enter extra payment amount'
+            )}
+          </div>
+        </div>
+
+        {/* Simulation Info */}
+        <div className="mt-4 p-4 bg-blue-50 dark:bg-gray-700 rounded-lg">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            <strong>Tip:</strong> Compare different extra payment amounts to see how they impact your loan timeline and total interest paid. 
+            Even small additional payments can result in significant savings over time.
+          </p>
+        </div>
+      </div>
+
       {/* Form Actions */}
-      <div className="flex gap-4 pt-2">
+      <div className="flex flex-col sm:flex-row gap-4 pt-4">
         <button
           type="button"
           onClick={handleClear}
-          className="flex-1 py-3 px-4 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-white rounded-lg transition duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500"
+          className="flex-1 py-3 px-6 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-white rounded-lg transition duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 font-medium"
           data-testid="clear-form-button"
         >
           Clear Form
         </button>
         <button
           type="submit"
-          className="flex-1 py-3 px-4 bg-primary hover:bg-primary-dark text-white rounded-lg transition duration-200 focus:outline-none focus:ring-2 focus:ring-primary flex items-center justify-center gap-2"
+          className="flex-1 py-3 px-6 bg-primary hover:bg-primary-dark text-white rounded-lg transition duration-200 focus:outline-none focus:ring-2 focus:ring-primary flex items-center justify-center gap-2 font-medium shadow-lg"
           data-testid="calculate-button"
         >
-          <Calculator className="h-4 w-4" />
-          Calculate
+          <Calculator className="h-5 w-5" />
+          Calculate Loan Scenarios
         </button>
+      </div>
+
+      {/* Form Summary */}
+      <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
+        <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Quick Summary</h4>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+          <div>
+            <span className="text-gray-500 dark:text-gray-400">Loan Amount:</span>
+            <div className="font-medium text-gray-900 dark:text-white">
+              {formatCurrency(formData.loanAmount, currency.code)}
+            </div>
+          </div>
+          <div>
+            <span className="text-gray-500 dark:text-gray-400">Interest Rate:</span>
+            <div className="font-medium text-gray-900 dark:text-white">
+              {formData.interestRate}%
+            </div>
+          </div>
+          <div>
+            <span className="text-gray-500 dark:text-gray-400">Term:</span>
+            <div className="font-medium text-gray-900 dark:text-white">
+              {formData.loanTerm} {formData.termUnit}
+            </div>
+          </div>
+          <div>
+            <span className="text-gray-500 dark:text-gray-400">Extra Payments:</span>
+            <div className="font-medium text-gray-900 dark:text-white">
+              {formData.extraPayment1 > 0 || formData.extraPayment2 > 0 ? 'Yes' : 'None'}
+            </div>
+          </div>
+        </div>
       </div>
     </form>
   );

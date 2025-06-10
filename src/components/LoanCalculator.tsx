@@ -8,7 +8,7 @@ import { calculateLoan } from '../utils/calculations';
 
 /**
  * Main loan calculator component orchestrating form, results, chart, and comparison table
- * Handles state management and calculation coordination
+ * Handles state management and calculation coordination with improved layout
  */
 const LoanCalculator: React.FC = () => {
   const [result, setResult] = useState<LoanResult | null>(null);
@@ -35,16 +35,12 @@ const LoanCalculator: React.FC = () => {
       </div>
       
       <div className="space-y-8">
-        {/* Form Section */}
-        <div className="flex justify-center">
-          <div className="w-full max-w-md">
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-8 transition-all duration-300">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-8">
-                Loan Calculator
-              </h2>
-              <LoanForm onCalculate={handleCalculate} />
-            </div>
-          </div>
+        {/* Form Section - Now Full Width */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-8 transition-all duration-300">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-8 text-center">
+            Loan Calculator
+          </h2>
+          <LoanForm onCalculate={handleCalculate} />
         </div>
 
         {/* Results Section */}
