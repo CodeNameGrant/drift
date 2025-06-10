@@ -1,77 +1,171 @@
-import { LoanFormData, LoanResult, AmortizationPayment } from '../types';
+import { LoanFormData, LoanResult, AmortizationPayment, LoanScenario, ChartDataPoint } from '../types';
 
+/**
+ * Calculate loan scenarios with base and extra payment simulations
+ */
 export const calculateLoan = (formData: LoanFormData): LoanResult => {
-  const { loanAmount, interestRate, loanTerm, termUnit, startDate } = formData;
+  const { loanAmount, interestRate, loanTerm, termUnit, startDate, extraPayment1, extraPayment2 } = formData;
   
   const monthlyInterestRate = interestRate / 100 / 12;
   const numberOfPayments = termUnit === 'years' ? loanTerm * 12 : loanTerm;
   
-  const monthlyPayment = monthlyInterestRate === 0 
+  // Calculate base monthly payment
+  const baseMonthlyPayment = monthlyInterestRate === 0 
     ? loanAmount / numberOfPayments
     : loanAmount * (monthlyInterestRate * Math.pow(1 + monthlyInterestRate, numberOfPayments)) / 
       (Math.pow(1 + monthlyInterestRate, numberOfPayments) - 1);
-  
-  const totalInterest = (monthlyPayment * numberOfPayments) - loanAmount;
-  const totalAmountRepaid = loanAmount + totalInterest;
-  
-  const payoffDate = new Date(startDate);
-  payoffDate.setMonth(payoffDate.getMonth() + numberOfPayments);
 
-  const effectiveAnnualRate = (Math.pow(1 + monthlyInterestRate, 12) - 1) * 100;
-  const costPercentage = (totalInterest / loanAmount) * 100;
-
-  const amortizationSchedule = generateAmortizationSchedule(
-    loanAmount,
-    monthlyInterestRate,
-    monthlyPayment,
-    numberOfPayments,
-    startDate
+  // Calculate scenarios
+  const baseScenario = calculateScenario(
+    loanAmount, 
+    monthlyInterestRate, 
+    baseMonthlyPayment, 
+    0, 
+    startDate,
+    'Base Payment',
+    '#3B82F6' // Blue
   );
-  
+
+  const simulation1 = calculateScenario(
+    loanAmount, 
+    monthlyInterestRate, 
+    baseMonthlyPayment, 
+    extraPayment1, 
+    startDate,
+    `Base + ${formatCurrency(extraPayment1, 'USD', false)} Extra`,
+    '#10B981' // Green
+  );
+
+  const simulation2 = calculateScenario(
+    loanAmount, 
+    monthlyInterestRate, 
+    baseMonthlyPayment, 
+    extraPayment2, 
+    startDate,
+    `Base + ${formatCurrency(extraPayment2, 'USD', false)} Extra`,
+    '#F59E0B' // Orange
+  );
+
   return {
-    monthlyPayment,
-    totalInterest,
-    payoffDate,
-    principalAmount: loanAmount,
-    totalAmountRepaid,
-    effectiveAnnualRate,
-    loanTermYears: termUnit === 'years' ? loanTerm : loanTerm / 12,
-    loanTermMonths: termUnit === 'months' ? loanTerm : loanTerm * 12,
-    costPercentage,
-    amortizationSchedule
+    baseScenario,
+    simulation1,
+    simulation2
   };
 };
 
+/**
+ * Calculate a single loan scenario with optional extra payments
+ */
+const calculateScenario = (
+  principal: number,
+  monthlyRate: number,
+  basePayment: number,
+  extraPayment: number,
+  startDate: Date,
+  scenarioName: string,
+  color: string
+): LoanScenario => {
+  const totalMonthlyPayment = basePayment + extraPayment;
+  
+  const { schedule, totalInterest, payoffMonths } = generateAmortizationSchedule(
+    principal,
+    monthlyRate,
+    totalMonthlyPayment,
+    startDate
+  );
+
+  const payoffDate = new Date(startDate);
+  payoffDate.setMonth(payoffDate.getMonth() + payoffMonths);
+
+  const totalAmountRepaid = principal + totalInterest;
+  const effectiveAnnualRate = (Math.pow(1 + monthlyRate, 12) - 1) * 100;
+  const costPercentage = (totalInterest / principal) * 100;
+
+  return {
+    monthlyPayment: totalMonthlyPayment,
+    totalInterest,
+    payoffDate,
+    principalAmount: principal,
+    totalAmountRepaid,
+    effectiveAnnualRate,
+    loanTermYears: payoffMonths / 12,
+    loanTermMonths: payoffMonths,
+    costPercentage,
+    amortizationSchedule: schedule,
+    extraPayment,
+    scenarioName,
+    color
+  };
+};
+
+/**
+ * Generate complete amortization schedule with early payoff detection
+ */
 const generateAmortizationSchedule = (
   principal: number,
   monthlyRate: number,
   monthlyPayment: number,
-  totalPayments: number,
   startDate: Date
-): AmortizationPayment[] => {
+): { schedule: AmortizationPayment[], totalInterest: number, payoffMonths: number } => {
   const schedule: AmortizationPayment[] = [];
   let balance = principal;
   let paymentDate = new Date(startDate);
+  let totalInterest = 0;
+  let paymentNumber = 1;
 
-  for (let i = 1; i <= totalPayments; i++) {
+  while (balance > 0.01 && paymentNumber <= 360) { // Max 30 years
     const interest = balance * monthlyRate;
-    const principalPaid = monthlyPayment - interest;
-    balance = Math.max(0, balance - principalPaid);
+    const principalPayment = Math.min(monthlyPayment - interest, balance);
+    balance = Math.max(0, balance - principalPayment);
+    totalInterest += interest;
 
-    if (i <= 3 || i > totalPayments - 3) {
-      schedule.push({
-        paymentNumber: i,
-        date: new Date(paymentDate),
-        principal: principalPaid,
-        interest,
-        balance
-      });
-    }
+    schedule.push({
+      paymentNumber,
+      date: new Date(paymentDate),
+      principal: principalPayment,
+      interest,
+      balance,
+      totalPayment: principalPayment + interest
+    });
 
     paymentDate.setMonth(paymentDate.getMonth() + 1);
+    paymentNumber++;
   }
 
-  return schedule;
+  return {
+    schedule,
+    totalInterest,
+    payoffMonths: schedule.length
+  };
+};
+
+/**
+ * Generate chart data points for visualization
+ */
+export const generateChartData = (result: LoanResult): ChartDataPoint[] => {
+  const maxLength = Math.max(
+    result.baseScenario.amortizationSchedule.length,
+    result.simulation1.amortizationSchedule.length,
+    result.simulation2.amortizationSchedule.length
+  );
+
+  const chartData: ChartDataPoint[] = [];
+
+  for (let i = 0; i < maxLength; i++) {
+    const basePayment = result.baseScenario.amortizationSchedule[i];
+    const sim1Payment = result.simulation1.amortizationSchedule[i];
+    const sim2Payment = result.simulation2.amortizationSchedule[i];
+
+    chartData.push({
+      month: i + 1,
+      baseBalance: basePayment?.balance || 0,
+      simulation1Balance: sim1Payment?.balance || 0,
+      simulation2Balance: sim2Payment?.balance || 0,
+      date: basePayment?.date ? formatDate(basePayment.date) : ''
+    });
+  }
+
+  return chartData;
 };
 
 export const formatNumber = (amount: number): string => {
@@ -100,7 +194,7 @@ export const formatCurrency = (amount: number, currencyCode: string = 'USD', sho
 export const formatDate = (date: Date): string => {
   return new Intl.DateTimeFormat(undefined, {
     day: '2-digit',
-    month: 'long',
+    month: 'short',
     year: 'numeric'
   }).format(date);
 };
@@ -134,6 +228,14 @@ export const validateForm = (data: Partial<LoanFormData>) => {
     errors.loanTerm = 'Term must be between 1-30 years';
   } else if (data.termUnit === 'months' && data.loanTerm > 360) {
     errors.loanTerm = 'Term must be between 1-360 months';
+  }
+
+  if (data.extraPayment1 && data.extraPayment1 < 0) {
+    errors.extraPayment1 = 'Extra payment cannot be negative';
+  }
+
+  if (data.extraPayment2 && data.extraPayment2 < 0) {
+    errors.extraPayment2 = 'Extra payment cannot be negative';
   }
   
   return errors;

@@ -2,84 +2,166 @@ import React from 'react';
 import { LoanResult } from '../types';
 import { formatCurrency, formatDate, formatPercentage } from '../utils/calculations';
 import { useCurrency } from '../context/CurrencyContext';
+import { TrendingDown, Calendar, DollarSign, Percent } from 'lucide-react';
 
 interface ResultsDisplayProps {
   result: LoanResult | null;
 }
 
+/**
+ * Enhanced results display component showing three payment scenarios
+ * Includes comprehensive comparison metrics and accessibility features
+ */
 const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ result }) => {
   if (!result) return null;
 
   const { currency } = useCurrency();
-  const {
-    monthlyPayment,
-    totalInterest,
-    payoffDate,
-    principalAmount,
-    totalAmountRepaid,
-    effectiveAnnualRate,
-    loanTermYears,
-    loanTermMonths,
-    costPercentage,
-  } = result;
+  const { baseScenario, simulation1, simulation2 } = result;
+
+  /**
+   * Render individual scenario card with comprehensive metrics
+   */
+  const renderScenarioCard = (scenario: any, isBase: boolean = false) => (
+    <div 
+      className={`bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 border-l-4 transition-all duration-300 hover:shadow-xl`}
+      style={{ borderLeftColor: scenario.color }}
+      data-testid={`scenario-card-${scenario.scenarioName.toLowerCase().replace(/\s+/g, '-')}`}
+    >
+      <div className="flex items-center gap-2 mb-4">
+        <div 
+          className="w-3 h-3 rounded-full"
+          style={{ backgroundColor: scenario.color }}
+          aria-hidden="true"
+        />
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+          {scenario.scenarioName}
+        </h3>
+      </div>
+
+      <div className="space-y-4">
+        {/* Monthly Payment */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <DollarSign className="h-4 w-4 text-gray-500" />
+            <span className="text-sm text-gray-600 dark:text-gray-400">Monthly Payment</span>
+          </div>
+          <span className="text-lg font-bold text-primary dark:text-primary-light">
+            {formatCurrency(scenario.monthlyPayment, currency.code)}
+          </span>
+        </div>
+
+        {/* Total Interest */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Percent className="h-4 w-4 text-gray-500" />
+            <span className="text-sm text-gray-600 dark:text-gray-400">Total Interest</span>
+          </div>
+          <span className="text-lg font-bold text-red-600 dark:text-red-400">
+            {formatCurrency(scenario.totalInterest, currency.code)}
+          </span>
+        </div>
+
+        {/* Total Repayment */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <TrendingDown className="h-4 w-4 text-gray-500" />
+            <span className="text-sm text-gray-600 dark:text-gray-400">Total Repayment</span>
+          </div>
+          <span className="text-lg font-bold text-gray-900 dark:text-white">
+            {formatCurrency(scenario.totalAmountRepaid, currency.code)}
+          </span>
+        </div>
+
+        {/* Payoff Date */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Calendar className="h-4 w-4 text-gray-500" />
+            <span className="text-sm text-gray-600 dark:text-gray-400">Payoff Date</span>
+          </div>
+          <span className="text-lg font-bold text-green-600 dark:text-green-400">
+            {formatDate(scenario.payoffDate)}
+          </span>
+        </div>
+
+        {/* Loan Term */}
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-gray-600 dark:text-gray-400">Term</span>
+          <span className="text-sm font-medium text-gray-900 dark:text-white">
+            {scenario.loanTermYears.toFixed(1)} years ({scenario.loanTermMonths} months)
+          </span>
+        </div>
+
+        {/* Cost Percentage */}
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-gray-600 dark:text-gray-400">Cost of Loan</span>
+          <span className="text-sm font-medium text-gray-900 dark:text-white">
+            {formatPercentage(scenario.costPercentage)}
+          </span>
+        </div>
+
+        {/* Savings Comparison (for simulations) */}
+        {!isBase && (
+          <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-green-600 dark:text-green-400 font-medium">Interest Saved</span>
+                <span className="text-sm font-bold text-green-600 dark:text-green-400">
+                  {formatCurrency(baseScenario.totalInterest - scenario.totalInterest, currency.code)}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-green-600 dark:text-green-400 font-medium">Time Saved</span>
+                <span className="text-sm font-bold text-green-600 dark:text-green-400">
+                  {((baseScenario.loanTermMonths - scenario.loanTermMonths) / 12).toFixed(1)} years
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 
   return (
-    <div className="w-full max-w-md bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-hidden transition-all duration-300">
-      <div className="p-8 space-y-8">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white text-center mb-8">
-          Loan Summary
+    <div className="w-full space-y-6" data-testid="results-display">
+      <div className="text-center">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+          Loan Payment Scenarios
         </h2>
-        
-        <div className="space-y-6">
-          <div className="grid grid-cols-2 gap-6">            
-            <div className="flex flex-col">
-              <span className="text-sm text-gray-500 dark:text-gray-400 mb-1">Monthly Payment</span>
-              <span className="text-xl font-bold text-primary dark:text-primary-light">
-                {formatCurrency(monthlyPayment, currency.code)}
-              </span>
-            </div>
+        <p className="text-gray-600 dark:text-gray-400">
+          Compare how extra payments affect your loan timeline and total cost
+        </p>
+      </div>
 
-            <div className="flex flex-col">
-              <span className="text-sm text-gray-500 dark:text-gray-400 mb-1">Total Interest</span>
-              <span className="text-xl font-bold text-primary dark:text-primary-light">
-                {formatCurrency(totalInterest, currency.code)}
-              </span>
+      <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-3">
+        {renderScenarioCard(baseScenario, true)}
+        {renderScenarioCard(simulation1)}
+        {renderScenarioCard(simulation2)}
+      </div>
+
+      {/* Summary Comparison */}
+      <div className="bg-gradient-to-r from-blue-50 to-green-50 dark:from-gray-800 dark:to-gray-700 rounded-lg p-6">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+          Quick Comparison Summary
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
+            <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+              {formatCurrency(baseScenario.totalInterest, currency.code, false)}
             </div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">Base Interest</div>
           </div>
-
-          <div className="grid grid-cols-2 gap-6">
-            <div className="flex flex-col">
-              <span className="text-sm text-gray-500 dark:text-gray-400 mb-1">Total Repayment</span>
-              <span className="text-xl font-bold text-primary dark:text-primary-light">
-                {formatCurrency(totalAmountRepaid, currency.code)}
-              </span>
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
+            <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+              {formatCurrency(baseScenario.totalInterest - simulation1.totalInterest, currency.code, false)}
             </div>
-
-            <div className="flex flex-col">
-              <span className="text-sm text-gray-500 dark:text-gray-400 mb-1">Cost of Loan</span>
-              <span className="text-xl font-bold text-primary dark:text-primary-light">
-                {formatPercentage(costPercentage)}
-              </span>
-            </div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">Sim 1 Savings</div>
           </div>
-
-          <div className="grid grid-cols-2 gap-6">
-            <div className="flex flex-col">
-              <span className="text-sm text-gray-500 dark:text-gray-400 mb-1">Term</span>
-              <span className="text-xl font-bold text-primary dark:text-primary-light">
-                {loanTermYears.toFixed(1)} years
-                <span className="block text-sm text-gray-500 dark:text-gray-400 ml-1">
-                  ({loanTermMonths} months)
-                </span>
-              </span>
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
+            <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
+              {formatCurrency(baseScenario.totalInterest - simulation2.totalInterest, currency.code, false)}
             </div>
-            
-            <div className="flex flex-col">
-              <span className="text-sm text-gray-500 dark:text-gray-400 mb-1">Payoff Date</span>
-              <span className="text-xl font-bold text-primary dark:text-primary-light">
-                {formatDate(payoffDate)}
-              </span>
-            </div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">Sim 2 Savings</div>
           </div>
         </div>
       </div>
