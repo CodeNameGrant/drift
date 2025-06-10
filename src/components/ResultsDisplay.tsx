@@ -9,14 +9,25 @@ interface ResultsDisplayProps {
 }
 
 /**
- * Enhanced results display component showing three payment scenarios
- * Includes comprehensive comparison metrics and accessibility features
+ * Enhanced results display component showing active payment scenarios
+ * Dynamically shows only scenarios with valid extra payments
  */
 const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ result }) => {
   if (!result) return null;
 
   const { currency } = useCurrency();
   const { baseScenario, simulation1, simulation2 } = result;
+
+  // Determine which scenarios to display
+  const activeScenarios = [baseScenario];
+  
+  if (simulation1.extraPayment > 0) {
+    activeScenarios.push(simulation1);
+  }
+  
+  if (simulation2.extraPayment > 0) {
+    activeScenarios.push(simulation2);
+  }
 
   /**
    * Render individual scenario card with comprehensive metrics
@@ -129,42 +140,63 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ result }) => {
           Loan Payment Scenarios
         </h2>
         <p className="text-gray-600 dark:text-gray-400">
-          Compare how extra payments affect your loan timeline and total cost
+          {activeScenarios.length === 1 
+            ? 'Your base loan scenario' 
+            : `Compare ${activeScenarios.length} payment scenarios and see how extra payments affect your loan`
+          }
         </p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-3">
-        {renderScenarioCard(baseScenario, true)}
-        {renderScenarioCard(simulation1)}
-        {renderScenarioCard(simulation2)}
+      <div className={`grid gap-6 ${
+        activeScenarios.length === 1 
+          ? 'md:grid-cols-1 lg:grid-cols-1 max-w-md mx-auto' 
+          : activeScenarios.length === 2 
+          ? 'md:grid-cols-1 lg:grid-cols-2' 
+          : 'md:grid-cols-1 lg:grid-cols-3'
+      }`}>
+        {activeScenarios.map((scenario, index) => 
+          renderScenarioCard(scenario, index === 0)
+        )}
       </div>
 
-      {/* Summary Comparison */}
-      <div className="bg-gradient-to-r from-blue-50 to-green-50 dark:from-gray-800 dark:to-gray-700 rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-          Quick Comparison Summary
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
-            <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-              {formatCurrency(baseScenario.totalInterest, currency.code, false)}
+      {/* Summary Comparison - Only show if there are simulations */}
+      {activeScenarios.length > 1 && (
+        <div className="bg-gradient-to-r from-blue-50 to-green-50 dark:from-gray-800 dark:to-gray-700 rounded-lg p-6">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            Quick Comparison Summary
+          </h3>
+          <div className={`grid gap-4 text-center ${
+            activeScenarios.length === 2 
+              ? 'grid-cols-1 md:grid-cols-2' 
+              : 'grid-cols-1 md:grid-cols-3'
+          }`}>
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
+              <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                {formatCurrency(baseScenario.totalInterest, currency.code, false)}
+              </div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">Base Interest</div>
             </div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">Base Interest</div>
-          </div>
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
-            <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-              {formatCurrency(baseScenario.totalInterest - simulation1.totalInterest, currency.code, false)}
-            </div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">Sim 1 Savings</div>
-          </div>
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
-            <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
-              {formatCurrency(baseScenario.totalInterest - simulation2.totalInterest, currency.code, false)}
-            </div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">Sim 2 Savings</div>
+            
+            {simulation1.extraPayment > 0 && (
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
+                <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                  {formatCurrency(baseScenario.totalInterest - simulation1.totalInterest, currency.code, false)}
+                </div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">Sim 1 Savings</div>
+              </div>
+            )}
+            
+            {simulation2.extraPayment > 0 && (
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
+                <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
+                  {formatCurrency(baseScenario.totalInterest - simulation2.totalInterest, currency.code, false)}
+                </div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">Sim 2 Savings</div>
+              </div>
+            )}
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
