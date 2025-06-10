@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import LoanForm from './LoanForm';
 import ResultsDisplay from './ResultsDisplay';
 import LoanChart from './LoanChart';
+import ComparisonTable from './ComparisonTable';
 import { LoanFormData, LoanResult } from '../types';
 import { calculateLoan } from '../utils/calculations';
 
 /**
- * Main loan calculator component orchestrating form, results, and chart
+ * Main loan calculator component orchestrating form, results, chart, and comparison table
  * Handles state management and calculation coordination
  */
 const LoanCalculator: React.FC = () => {
@@ -49,6 +50,7 @@ const LoanCalculator: React.FC = () => {
         {/* Results Section */}
         {isCalculated && result ? (
           <div className="space-y-8">
+            <ComparisonTable result={result} />
             <ResultsDisplay result={result} />
             <LoanChart result={result} />
           </div>
