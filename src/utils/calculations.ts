@@ -159,8 +159,8 @@ export const generateChartData = (result: LoanResult): ChartDataPoint[] => {
     chartData.push({
       month: i + 1,
       baseBalance: basePayment?.balance || 0,
-      simulation1Balance: sim1Payment?.balance || 0,
-      simulation2Balance: sim2Payment?.balance || 0,
+      simulation1Balance: sim1Payment?.balance,
+      simulation2Balance: sim2Payment?.balance,
       date: basePayment?.date ? formatDate(basePayment.date) : ''
     });
   }
