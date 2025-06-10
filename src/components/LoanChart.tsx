@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { Chart } from 'react-charts';
 import { LoanResult, ChartDataPoint } from '../types';
 import { generateChartData, formatCurrency, formatDate } from '../utils/calculations';
 import { useCurrency } from '../context/CurrencyContext';
@@ -8,84 +9,175 @@ interface LoanChartProps {
   result: LoanResult;
 }
 
-interface TooltipData {
-  x: number;
-  y: number;
-  data: ChartDataPoint;
-  visible: boolean;
+interface ChartSeries {
+  label: string;
+  data: Array<{ primary: number; secondary: number }>;
 }
 
 /**
- * Interactive line chart component for loan balance visualization
+ * Interactive line chart component using React Charts library
  * Features hover tooltips, responsive design, and accessibility
  */
 const LoanChart: React.FC<LoanChartProps> = ({ result }) => {
   const { currency } = useCurrency();
-  const [tooltip, setTooltip] = useState<TooltipData>({ x: 0, y: 0, data: {} as ChartDataPoint, visible: false });
+  const [focusedDatum, setFocusedDatum] = useState<any>(null);
 
   // Generate chart data points
   const chartData = useMemo(() => generateChartData(result), [result]);
 
-  // Chart dimensions and margins
-  const width = 800;
-  const height = 400;
-  const margin = { top: 20, right: 30, bottom: 60, left: 80 };
-  const chartWidth = width - margin.left - margin.right;
-  const chartHeight = height - margin.top - margin.bottom;
-
-  // Calculate scales
-  const maxBalance = Math.max(...chartData.map(d => Math.max(d.baseBalance, d.simulation1Balance, d.simulation2Balance)));
-  const maxMonth = Math.max(...chartData.map(d => d.month));
-
-  const xScale = (month: number) => (month / maxMonth) * chartWidth;
-  const yScale = (balance: number) => chartHeight - (balance / maxBalance) * chartHeight;
-
-  /**
-   * Generate SVG path for a line chart
-   */
-  const generatePath = (data: ChartDataPoint[], balanceKey: keyof ChartDataPoint) => {
-    return data
-      .map((d, i) => {
-        const x = xScale(d.month);
-        const y = yScale(d[balanceKey] as number);
-        return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
-      })
-      .join(' ');
-  };
-
-  /**
-   * Handle mouse move for tooltip positioning
-   */
-  const handleMouseMove = (event: React.MouseEvent<SVGElement>) => {
-    const rect = event.currentTarget.getBoundingClientRect();
-    const x = event.clientX - rect.left - margin.left;
-    const y = event.clientY - rect.top - margin.top;
-
-    if (x >= 0 && x <= chartWidth && y >= 0 && y <= chartHeight) {
-      const monthIndex = Math.round((x / chartWidth) * maxMonth) - 1;
-      const dataPoint = chartData[Math.max(0, Math.min(monthIndex, chartData.length - 1))];
-
-      if (dataPoint) {
-        setTooltip({
-          x: event.clientX - rect.left,
-          y: event.clientY - rect.top,
-          data: dataPoint,
-          visible: true
-        });
+  // Transform data for React Charts format
+  const data = useMemo(() => {
+    const series: ChartSeries[] = [
+      {
+        label: 'Base Payment',
+        data: chartData.map(d => ({
+          primary: d.month,
+          secondary: d.baseBalance
+        }))
+      },
+      {
+        label: `Simulation 1 (+${formatCurrency(result.simulation1.extraPayment, currency.code, false)})`,
+        data: chartData
+          .filter(d => d.simulation1Balance !== undefined)
+          .map(d => ({
+            primary: d.month,
+            secondary: d.simulation1Balance!
+          }))
+      },
+      {
+        label: `Simulation 2 (+${formatCurrency(result.simulation2.extraPayment, currency.code, false)})`,
+        data: chartData
+          .filter(d => d.simulation2Balance !== undefined)
+          .map(d => ({
+            primary: d.month,
+            secondary: d.simulation2Balance!
+          }))
       }
+    ];
+
+    return series;
+  }, [chartData, result, currency]);
+
+  // Chart configuration
+  const primaryAxis = useMemo(
+    () => ({
+      getValue: (datum: any) => datum.primary,
+      type: 'linear' as const,
+      position: 'bottom' as const,
+      show: true,
+      showGrid: true,
+      showTicks: true,
+      tickCount: 6,
+      format: (value: number) => Math.round(value).toString(),
+      min: 0
+    }),
+    []
+  );
+
+  const secondaryAxes = useMemo(
+    () => [
+      {
+        getValue: (datum: any) => datum.secondary,
+        type: 'linear' as const,
+        position: 'left' as const,
+        show: true,
+        showGrid: true,
+        showTicks: true,
+        tickCount: 6,
+        format: (value: number) => formatCurrency(value, currency.code, false),
+        min: 0
+      }
+    ],
+    [currency]
+  );
+
+  // Chart styling configuration
+  const getSeriesStyle = React.useCallback(
+    (series: any) => {
+      const colors = ['#3B82F6', '#10B981', '#F59E0B']; // Blue, Green, Orange
+      return {
+        color: colors[series.index] || '#3B82F6',
+        strokeWidth: 3,
+        strokeDasharray: series.index === 0 ? '0' : '0' // Solid lines for all
+      };
+    },
+    []
+  );
+
+  // Tooltip configuration
+  const renderTooltip = React.useCallback(
+    ({ datum, primaryAxis, getSeriesStyle }: any) => {
+      if (!datum) return null;
+
+      const seriesColors = ['#3B82F6', '#10B981', '#F59E0B'];
+      const seriesLabels = [
+        'Base Payment',
+        `Simulation 1 (+${formatCurrency(result.simulation1.extraPayment, currency.code, false)})`,
+        `Simulation 2 (+${formatCurrency(result.simulation2.extraPayment, currency.code, false)})`
+      ];
+
+      return (
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-3 min-w-[200px]">
+          <div className="text-sm font-medium text-gray-900 dark:text-white mb-2">
+            Month {Math.round(datum.primaryValue)}
+          </div>
+          <div className="space-y-1 text-xs">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-2">
+                <div 
+                  className="w-3 h-0.5" 
+                  style={{ backgroundColor: seriesColors[datum.seriesIndex] }}
+                />
+                <span className="text-gray-600 dark:text-gray-400">
+                  {seriesLabels[datum.seriesIndex]}:
+                </span>
+              </div>
+              <span className="font-medium text-gray-900 dark:text-white">
+                {formatCurrency(datum.secondaryValue, currency.code, false)}
+              </span>
+            </div>
+          </div>
+        </div>
+      );
+    },
+    [result, currency]
+  );
+
+  // Error boundary component
+  const ChartErrorBoundary: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const [hasError, setHasError] = useState(false);
+
+    React.useEffect(() => {
+      const handleError = () => setHasError(true);
+      window.addEventListener('error', handleError);
+      return () => window.removeEventListener('error', handleError);
+    }, []);
+
+    if (hasError) {
+      return (
+        <div className="flex items-center justify-center h-96 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
+          <div className="text-center">
+            <TrendingDown className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <p className="text-gray-600 dark:text-gray-400">
+              Unable to load chart. Please try refreshing the page.
+            </p>
+          </div>
+        </div>
+      );
     }
+
+    return <>{children}</>;
   };
 
-  /**
-   * Hide tooltip on mouse leave
-   */
-  const handleMouseLeave = () => {
-    setTooltip(prev => ({ ...prev, visible: false }));
-  };
-
-  // Generate tick marks for axes
-  const xTicks = Array.from({ length: 6 }, (_, i) => (i * maxMonth) / 5);
-  const yTicks = Array.from({ length: 6 }, (_, i) => (i * maxBalance) / 5);
+  // Loading component
+  const ChartLoading: React.FC = () => (
+    <div className="flex items-center justify-center h-96 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+        <p className="text-gray-600 dark:text-gray-400">Loading chart...</p>
+      </div>
+    </div>
+  );
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6" data-testid="loan-chart">
@@ -117,194 +209,32 @@ const LoanChart: React.FC<LoanChartProps> = ({ result }) => {
       </div>
 
       {/* Chart Container */}
-      <div className="relative overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
-        <svg
-          width={width}
-          height={height}
-          className="bg-gray-50 dark:bg-gray-900"
-          onMouseMove={handleMouseMove}
-          onMouseLeave={handleMouseLeave}
-          role="img"
-          aria-label="Loan balance comparison chart showing three payment scenarios over time"
-        >
-          {/* Chart Background */}
-          <rect
-            x={margin.left}
-            y={margin.top}
-            width={chartWidth}
-            height={chartHeight}
-            fill="transparent"
-            stroke="none"
-          />
-
-          {/* Grid Lines */}
-          <g className="opacity-20">
-            {/* Horizontal grid lines */}
-            {yTicks.map((tick, i) => (
-              <line
-                key={`h-grid-${i}`}
-                x1={margin.left}
-                y1={margin.top + yScale(tick)}
-                x2={margin.left + chartWidth}
-                y2={margin.top + yScale(tick)}
-                stroke="currentColor"
-                strokeWidth="1"
-                className="text-gray-400"
-              />
-            ))}
-            {/* Vertical grid lines */}
-            {xTicks.map((tick, i) => (
-              <line
-                key={`v-grid-${i}`}
-                x1={margin.left + xScale(tick)}
-                y1={margin.top}
-                x2={margin.left + xScale(tick)}
-                y2={margin.top + chartHeight}
-                stroke="currentColor"
-                strokeWidth="1"
-                className="text-gray-400"
-              />
-            ))}
-          </g>
-
-          {/* Chart Lines */}
-          <g transform={`translate(${margin.left}, ${margin.top})`}>
-            {/* Base scenario line */}
-            <path
-              d={generatePath(chartData, 'baseBalance')}
-              fill="none"
-              stroke="#3B82F6"
-              strokeWidth="3"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+      <ChartErrorBoundary>
+        <div className="relative h-96 w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+          <React.Suspense fallback={<ChartLoading />}>
+            <Chart
+              options={{
+                data,
+                primaryAxis,
+                secondaryAxes,
+                getSeriesStyle,
+                tooltip: {
+                  render: renderTooltip
+                },
+                interactionMode: 'closest',
+                defaultColors: ['#3B82F6', '#10B981', '#F59E0B'],
+                dark: document.documentElement.classList.contains('dark'),
+                padding: {
+                  left: 60,
+                  right: 30,
+                  top: 20,
+                  bottom: 60
+                }
+              }}
             />
-            
-            {/* Simulation 1 line */}
-            <path
-              d={generatePath(chartData, 'simulation1Balance')}
-              fill="none"
-              stroke="#10B981"
-              strokeWidth="3"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            
-            {/* Simulation 2 line */}
-            <path
-              d={generatePath(chartData, 'simulation2Balance')}
-              fill="none"
-              stroke="#F59E0B"
-              strokeWidth="3"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </g>
-
-          {/* X-Axis */}
-          <g transform={`translate(${margin.left}, ${height - margin.bottom})`}>
-            <line
-              x1="0"
-              y1="0"
-              x2={chartWidth}
-              y2="0"
-              stroke="currentColor"
-              className="text-gray-400"
-            />
-            {xTicks.map((tick, i) => (
-              <g key={`x-tick-${i}`} transform={`translate(${xScale(tick)}, 0)`}>
-                <line y1="0" y2="6" stroke="currentColor" className="text-gray-400" />
-                <text
-                  y="20"
-                  textAnchor="middle"
-                  className="text-xs fill-gray-600 dark:fill-gray-400"
-                >
-                  {Math.round(tick)}
-                </text>
-              </g>
-            ))}
-            <text
-              x={chartWidth / 2}
-              y="45"
-              textAnchor="middle"
-              className="text-sm fill-gray-700 dark:fill-gray-300 font-medium"
-            >
-              Months
-            </text>
-          </g>
-
-          {/* Y-Axis */}
-          <g transform={`translate(${margin.left}, ${margin.top})`}>
-            <line
-              x1="0"
-              y1="0"
-              x2="0"
-              y2={chartHeight}
-              stroke="currentColor"
-              className="text-gray-400"
-            />
-            {yTicks.map((tick, i) => (
-              <g key={`y-tick-${i}`} transform={`translate(0, ${yScale(tick)})`}>
-                <line x1="-6" x2="0" stroke="currentColor" className="text-gray-400" />
-                <text
-                  x="-10"
-                  y="4"
-                  textAnchor="end"
-                  className="text-xs fill-gray-600 dark:fill-gray-400"
-                >
-                  {formatCurrency(tick, currency.code, false)}
-                </text>
-              </g>
-            ))}
-            <text
-              x="-50"
-              y={chartHeight / 2}
-              textAnchor="middle"
-              transform={`rotate(-90, -50, ${chartHeight / 2})`}
-              className="text-sm fill-gray-700 dark:fill-gray-300 font-medium"
-            >
-              Remaining Balance
-            </text>
-          </g>
-        </svg>
-
-        {/* Tooltip */}
-        {tooltip.visible && (
-          <div
-            className="absolute z-10 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-3 pointer-events-none"
-            style={{
-              left: Math.min(tooltip.x + 10, width - 200),
-              top: Math.max(tooltip.y - 10, 0)
-            }}
-          >
-            <div className="text-sm font-medium text-gray-900 dark:text-white mb-2">
-              Month {tooltip.data.month}
-            </div>
-            <div className="space-y-1 text-xs">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-0.5 bg-blue-500" />
-                <span className="text-gray-600 dark:text-gray-400">Base:</span>
-                <span className="font-medium text-gray-900 dark:text-white">
-                  {formatCurrency(tooltip.data.baseBalance, currency.code, false)}
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-0.5 bg-green-500" />
-                <span className="text-gray-600 dark:text-gray-400">Sim 1:</span>
-                <span className="font-medium text-gray-900 dark:text-white">
-                  {formatCurrency(tooltip.data.simulation1Balance, currency.code, false)}
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-0.5 bg-orange-500" />
-                <span className="text-gray-600 dark:text-gray-400">Sim 2:</span>
-                <span className="font-medium text-gray-900 dark:text-white">
-                  {formatCurrency(tooltip.data.simulation2Balance, currency.code, false)}
-                </span>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
+          </React.Suspense>
+        </div>
+      </ChartErrorBoundary>
 
       {/* Chart Info */}
       <div className="mt-4 flex items-start gap-2 text-sm text-gray-600 dark:text-gray-400">
@@ -313,6 +243,16 @@ const LoanChart: React.FC<LoanChartProps> = ({ result }) => {
           Hover over the chart to see detailed balance information at any point in time. 
           The chart clearly shows how extra payments accelerate loan payoff and reduce total interest.
         </p>
+      </div>
+
+      {/* Accessibility Information */}
+      <div className="sr-only" aria-live="polite">
+        {focusedDatum && (
+          <span>
+            Chart showing loan balance over time. Currently focused on month {Math.round(focusedDatum.primaryValue)} 
+            with balance of {formatCurrency(focusedDatum.secondaryValue, currency.code)}.
+          </span>
+        )}
       </div>
     </div>
   );

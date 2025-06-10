@@ -140,7 +140,7 @@ const generateAmortizationSchedule = (
 };
 
 /**
- * Generate chart data points for visualization
+ * Generate chart data points for visualization with proper handling of undefined values
  */
 export const generateChartData = (result: LoanResult): ChartDataPoint[] => {
   const maxLength = Math.max(
