@@ -14,12 +14,12 @@ function App() {
       <div className="min-h-screen bg-appBackground-light dark:bg-appBackground-dark text-gray-900 dark:text-white transition-colors duration-300">
         <div className='flex items-centre justify-between p-2'>
           <div>
-          <CurrencySelector />
-        </div>
-        <div className="flex items-center gap-3">
-          <GitHubLink />
-          <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
-        </div>
+            <CurrencySelector />
+          </div>
+          <div className="flex items-center gap-3">
+            <GitHubLink />
+            <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
+          </div>
         </div>
         <div className="container mx-auto py-12 px-4">
           <LoanCalculator />
