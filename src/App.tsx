@@ -12,12 +12,14 @@ function App() {
   return (
     <CurrencyProvider>
       <div className="min-h-screen bg-appBackground-light dark:bg-appBackground-dark text-gray-900 dark:text-white transition-colors duration-300">
-        <div className="fixed top-5 left-5 z-50">
+        <div className='flex items-centre justify-between'>
+          <div>
           <CurrencySelector />
         </div>
         <div className="flex items-center gap-3">
           <GitHubLink />
           <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
+        </div>
         </div>
         <div className="container mx-auto py-12 px-4">
           <LoanCalculator />
