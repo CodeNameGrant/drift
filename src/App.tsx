@@ -15,7 +15,7 @@ function App() {
         <div className="fixed top-5 left-5 z-50">
           <CurrencySelector />
         </div>
-        <div className="fixed top-4 right-4 z-50 flex items-center gap-3">
+        <div className="flex items-center gap-3">
           <GitHubLink />
           <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
         </div>
