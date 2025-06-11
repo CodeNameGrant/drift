@@ -13,9 +13,8 @@ import { User, LogOut, X } from 'lucide-react';
  * Authentication status component with login/logout functionality
  * Displays user info when logged in, login button when not
  */
-const AuthStatus: React.FC = () => {
+const AuthStatus: React.FC<{ onShowAuth: () => void }> = ({ onShowAuth }) => {
   const { user, signOut, loading } = useAuth();
-  const [showAuthModal, setShowAuthModal] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   /**
@@ -30,13 +29,6 @@ const AuthStatus: React.FC = () => {
     } finally {
       setIsLoggingOut(false);
     }
-  };
-
-  /**
-   * Close auth modal
-   */
-  const closeAuthModal = () => {
-    setShowAuthModal(false);
   };
 
   if (loading) {
@@ -77,7 +69,7 @@ const AuthStatus: React.FC = () => {
         </div>
       ) : (
         <button
-          onClick={() => setShowAuthModal(true)}
+          onClick={onShowAuth}
           className="flex items-center gap-2 py-2 px-4 bg-primary hover:bg-primary-dark text-white rounded-lg text-sm transition duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-gray-800 font-medium shadow-lg"
           data-testid="login-button"
         >
@@ -85,27 +77,39 @@ const AuthStatus: React.FC = () => {
           <span>Login</span>
         </button>
       )}
-
-      {/* Authentication Modal */}
-      {showAuthModal && !user && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
-          onClick={(e) => e.target === e.currentTarget && closeAuthModal()}
-        >
-          <div className="relative max-w-md w-full">
-            <button
-              onClick={closeAuthModal}
-              className="absolute -top-2 -right-2 z-10 p-2 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-full shadow-lg transition duration-200 focus:outline-none focus:ring-2 focus:ring-primary"
-              aria-label="Close authentication modal"
-              data-testid="close-auth-modal"
-            >
-              <X className="h-5 w-5" />
-            </button>
-            <AuthUI onAuthSuccess={closeAuthModal} />
-          </div>
-        </div>
-      )}
     </>
+  );
+};
+
+/**
+ * Authentication Modal Component
+ * Renders as a portal-like overlay covering the entire viewport
+ */
+const AuthModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, onClose }) => {
+  const { user } = useAuth();
+
+  // Don't render if not open or user is already authenticated
+  if (!isOpen || user) return null;
+
+  return (
+    <div 
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+      data-testid="auth-modal-overlay"
+    >
+      <div className="relative max-w-md w-full">
+        <button
+          onClick={onClose}
+          className="absolute -top-2 -right-2 z-10 p-2 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-full shadow-lg transition duration-200 focus:outline-none focus:ring-2 focus:ring-primary"
+          aria-label="Close authentication modal"
+          data-testid="close-auth-modal"
+        >
+          <X className="h-5 w-5" />
+        </button>
+        <AuthUI onAuthSuccess={onClose} />
+      </div>
+    </div>
   );
 };
 
@@ -115,6 +119,21 @@ const AuthStatus: React.FC = () => {
  */
 function App() {
   const { theme, toggleTheme } = useTheme();
+  const [showAuthModal, setShowAuthModal] = useState(false);
+
+  /**
+   * Show authentication modal
+   */
+  const handleShowAuth = () => {
+    setShowAuthModal(true);
+  };
+
+  /**
+   * Close authentication modal
+   */
+  const handleCloseAuth = () => {
+    setShowAuthModal(false);
+  };
 
   return (
     <CurrencyProvider>
@@ -127,7 +146,7 @@ function App() {
                 <CurrencySelector />
               </div>
               <div className="flex items-center gap-3">
-                <AuthStatus />
+                <AuthStatus onShowAuth={handleShowAuth} />
                 <GitHubLink />
                 <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
               </div>
@@ -150,6 +169,9 @@ function App() {
               </p>
             </div>
           </footer>
+
+          {/* Authentication Modal - Rendered at root level */}
+          <AuthModal isOpen={showAuthModal} onClose={handleCloseAuth} />
         </div>
       </AuthProvider>
     </CurrencyProvider>
