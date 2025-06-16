@@ -135,7 +135,7 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ result }) => {
 
   return (
     <div className="w-full space-y-6" data-testid="results-display">
-      <div className="text-center">
+      {activeScenarios.length > 1 && (<div className="text-center">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
           Loan Payment Scenarios
         </h2>
@@ -154,10 +154,10 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ result }) => {
           ? 'md:grid-cols-1 lg:grid-cols-2' 
           : 'md:grid-cols-1 lg:grid-cols-3'
       }`}>
-        {activeScenarios.length > 1 && activeScenarios.map((scenario, index) => 
+        {activeScenarios.map((scenario, index) => 
           renderScenarioCard(scenario, index === 0)
         )}
-      </div>
+      </div>)}
 
       {/* Summary Comparison - Only show if there are simulations */}
       {activeScenarios.length > 1 && (
