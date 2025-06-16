@@ -154,7 +154,7 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ result }) => {
           ? 'md:grid-cols-1 lg:grid-cols-2' 
           : 'md:grid-cols-1 lg:grid-cols-3'
       }`}>
-        {activeScenarios.map((scenario, index) => 
+        {activeScenarios.length > 1 && activeScenarios.map((scenario, index) => 
           renderScenarioCard(scenario, index === 0)
         )}
       </div>
