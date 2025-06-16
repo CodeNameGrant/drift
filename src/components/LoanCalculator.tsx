@@ -24,7 +24,7 @@ const LoanCalculator: React.FC = () => {
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto p-6" data-testid="loan-calculator">      
+    <div className="w-full max-w-7xl mx-auto p-4" data-testid="loan-calculator">      
       <div className="space-y-8">
         {/* Form Section - Now Full Width */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-8 transition-all duration-300">
