@@ -54,3 +54,6 @@ export interface ChartDataPoint {
   simulation2Balance: number;
   date: string;
 }
+
+// Export debt-related types
+export * from './debt';

@@ -1,33 +1,48 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Home, Calculator } from 'lucide-react';
+import { Home, Calculator, TrendingDown } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 /**
  * Navigation component for site-wide navigation
- * Features active route highlighting and responsive design
+ * Features active route highlighting, responsive design, and conditional authenticated routes
  */
 const Navigation: React.FC = () => {
+  const { user } = useAuth();
+
   const navItems = [
     {
       to: '/',
       label: 'Home',
       icon: Home,
-      exact: true
+      exact: true,
+      requiresAuth: false
     },
     {
       to: '/loan-calculator',
       label: 'Calculator',
       icon: Calculator,
-      exact: false
+      exact: false,
+      requiresAuth: false
+    },
+    {
+      to: '/debt-dashboard',
+      label: 'Dashboard',
+      icon: TrendingDown,
+      exact: false,
+      requiresAuth: true
     }
   ];
+
+  // Filter nav items based on authentication status
+  const visibleNavItems = navItems.filter(item => !item.requiresAuth || user);
 
   return (
     <nav className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700" data-testid="main-navigation">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-center py-4">
           <div className="flex space-x-1">
-            {navItems.map((item) => {
+            {visibleNavItems.map((item) => {
               const Icon = item.icon;
               
               return (

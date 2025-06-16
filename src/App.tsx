@@ -12,6 +12,7 @@ import Navigation from './components/Navigation';
 // Pages
 import HomePage from './pages/HomePage';
 import LoanCalculatorPage from './pages/LoanCalculatorPage';
+import DebtDashboardPage from './pages/DebtDashboardPage';
 import NotFoundPage from './pages/NotFoundPage';
 
 // Contexts and Hooks
@@ -178,6 +179,7 @@ function App() {
               <Routes>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/loan-calculator" element={<LoanCalculatorPage />} />
+                <Route path="/debt-dashboard" element={<DebtDashboardPage />} />
                 <Route path="*" element={<NotFoundPage />} />
               </Routes>
             </main>
