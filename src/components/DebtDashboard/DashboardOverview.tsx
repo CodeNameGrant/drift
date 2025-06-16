@@ -1,7 +1,11 @@
 import React from 'react';
-import { TrendingDown, CreditCard, Calendar, Percent, DollarSign, PieChart, BarChart3, TrendingUp } from 'lucide-react';
+import { TrendingDown, CreditCard, Calendar, Percent, DollarSign, TrendingUp } from 'lucide-react';
 import { formatCurrency, formatPercentage, formatDate } from '../../utils/calculations';
 import { useCurrency } from '../../context/CurrencyContext';
+import DebtDistributionPieChart from './DebtDistributionPieChart';
+import DebtReductionLineChart from './DebtReductionLineChart';
+import InterestRateBarChart from './InterestRateBarChart';
+import { DebtAccount } from '../../types/debt';
 
 interface DashboardOverviewProps {
   summary: {
@@ -12,13 +16,14 @@ interface DashboardOverviewProps {
     totalPaid: number;
     projectedPayoffDate: Date;
   };
+  accounts: DebtAccount[];
 }
 
 /**
  * Dashboard overview component displaying key debt metrics and visualizations
- * Features responsive cards, metric highlights, and placeholder chart areas
+ * Features responsive cards, metric highlights, and interactive charts
  */
-const DashboardOverview: React.FC<DashboardOverviewProps> = ({ summary }) => {
+const DashboardOverview: React.FC<DashboardOverviewProps> = ({ summary, accounts }) => {
   const { currency } = useCurrency();
 
   const metrics = [
@@ -139,61 +144,16 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = ({ summary }) => {
         </div>
       </div>
 
-      {/* Data Visualization Placeholders */}
+      {/* Data Visualizations */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Pie Chart Placeholder */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center gap-2 mb-4">
-            <PieChart className="h-5 w-5 text-primary" />
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-              Debt Distribution
-            </h3>
-          </div>
-          <div className="h-48 bg-gray-50 dark:bg-gray-700 rounded-lg flex items-center justify-center">
-            <div className="text-center">
-              <PieChart className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Pie chart showing debt by account type
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Line Chart Placeholder */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center gap-2 mb-4">
-            <TrendingDown className="h-5 w-5 text-primary" />
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-              Payoff Progress
-            </h3>
-          </div>
-          <div className="h-48 bg-gray-50 dark:bg-gray-700 rounded-lg flex items-center justify-center">
-            <div className="text-center">
-              <TrendingDown className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Line chart tracking debt reduction over time
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Bar Chart Placeholder */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center gap-2 mb-4">
-            <BarChart3 className="h-5 w-5 text-primary" />
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-              Interest Rates
-            </h3>
-          </div>
-          <div className="h-48 bg-gray-50 dark:bg-gray-700 rounded-lg flex items-center justify-center">
-            <div className="text-center">
-              <BarChart3 className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Bar chart comparing interest rates across accounts
-              </p>
-            </div>
-          </div>
-        </div>
+        {/* Pie Chart */}
+        <DebtDistributionPieChart accounts={accounts} />
+        
+        {/* Line Chart */}
+        <DebtReductionLineChart accounts={accounts} />
+        
+        {/* Bar Chart */}
+        <InterestRateBarChart accounts={accounts} />
       </div>
     </div>
   );

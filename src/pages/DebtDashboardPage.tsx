@@ -44,7 +44,7 @@ const DebtDashboardPage: React.FC = () => {
                 Debt Dashboard
               </h1>
               <p className="text-gray-600 dark:text-gray-400 mt-1">
-                Track and manage your debt accounts
+                Track and manage your debt accounts with interactive visualizations
               </p>
             </div>
           </div>
@@ -71,13 +71,13 @@ const DebtDashboardPage: React.FC = () => {
           <section>
             <div className="mb-6">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                Overview
+                Overview & Analytics
               </h2>
               <p className="text-gray-600 dark:text-gray-400">
-                Key metrics and visualizations of your debt portfolio
+                Key metrics and interactive visualizations of your debt portfolio
               </p>
             </div>
-            <DashboardOverview summary={mockDebtSummary} />
+            <DashboardOverview summary={mockDebtSummary} accounts={mockDebtAccounts} />
           </section>
 
           {/* Accounts Section */}
@@ -96,6 +96,7 @@ const DebtDashboardPage: React.FC = () => {
               </p>
               <p className="text-yellow-700 dark:text-yellow-300 text-sm">
                 This dashboard currently displays mock data for demonstration purposes. 
+                The interactive charts show debt distribution, reduction timelines, and interest rate comparisons.
                 In production, this would connect to your actual financial accounts and data.
               </p>
             </div>

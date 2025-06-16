@@ -1,4 +1,5 @@
 import { LoanFormData, LoanResult, AmortizationPayment, LoanScenario, ChartDataPoint } from '../types';
+import { DebtAccount } from '../types/debt';
 
 /**
  * Calculate loan scenarios with base and extra payment simulations
@@ -166,6 +167,107 @@ export const generateChartData = (result: LoanResult): ChartDataPoint[] => {
   }
 
   return chartData;
+};
+
+/**
+ * Generate debt reduction timeline data for individual accounts
+ */
+export const generateDebtReductionData = (accounts: DebtAccount[]): Array<{
+  month: number;
+  date: Date;
+  accounts: Array<{ id: string; name: string; balance: number; color: string }>;
+}> => {
+  const maxMonths = 120; // 10 years projection
+  const data: Array<{
+    month: number;
+    date: Date;
+    accounts: Array<{ id: string; name: string; balance: number; color: string }>;
+  }> = [];
+
+  for (let month = 0; month <= maxMonths; month++) {
+    const currentDate = new Date();
+    currentDate.setMonth(currentDate.getMonth() + month);
+
+    const accountBalances = accounts.map(account => {
+      // Simple linear reduction calculation for demonstration
+      const monthlyPrincipal = account.monthlyPayment * 0.7; // Assume 70% goes to principal
+      const projectedBalance = Math.max(0, account.currentBalance - (monthlyPrincipal * month));
+      
+      return {
+        id: account.id,
+        name: account.name,
+        balance: projectedBalance,
+        color: getAccountTypeColor(account.type)
+      };
+    });
+
+    data.push({
+      month,
+      date: currentDate,
+      accounts: accountBalances
+    });
+  }
+
+  return data;
+};
+
+/**
+ * Prepare debt distribution data for pie chart
+ */
+export const prepareDebtDistributionData = (accounts: DebtAccount[]) => {
+  const typeGroups = accounts.reduce((acc, account) => {
+    if (!acc[account.type]) {
+      acc[account.type] = {
+        type: account.type,
+        totalBalance: 0,
+        count: 0,
+        accounts: []
+      };
+    }
+    acc[account.type].totalBalance += account.currentBalance;
+    acc[account.type].count += 1;
+    acc[account.type].accounts.push(account);
+    return acc;
+  }, {} as Record<string, any>);
+
+  return Object.values(typeGroups).map((group: any) => ({
+    label: group.type.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
+    value: group.totalBalance,
+    count: group.count,
+    color: getAccountTypeColor(group.type),
+    accounts: group.accounts
+  }));
+};
+
+/**
+ * Prepare interest rate comparison data for bar chart
+ */
+export const prepareInterestRateData = (accounts: DebtAccount[]) => {
+  return accounts
+    .map(account => ({
+      id: account.id,
+      name: account.name,
+      rate: account.interestRate,
+      balance: account.currentBalance,
+      type: account.type,
+      color: getAccountTypeColor(account.type)
+    }))
+    .sort((a, b) => b.rate - a.rate); // Sort by highest rate first
+};
+
+/**
+ * Get account type color (imported from mockDebtData)
+ */
+const getAccountTypeColor = (type: DebtAccount['type']): string => {
+  const colorMap = {
+    mortgage: '#3B82F6',
+    auto: '#10B981',
+    credit_card: '#F59E0B',
+    personal: '#8B5CF6',
+    student: '#14B8A6',
+    business: '#EF4444'
+  };
+  return colorMap[type] || '#F59E0B';
 };
 
 export const formatNumber = (amount: number): string => {
