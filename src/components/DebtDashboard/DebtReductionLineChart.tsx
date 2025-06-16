@@ -67,7 +67,6 @@ const DebtReductionLineChart: React.FC<DebtReductionLineChartProps> = ({ account
         getValue: (datum: any) => datum.secondary,
         type: 'linear' as const,
         position: 'left' as const,
-        elementType: 'line' as const,
         show: true,
         showGrid: true,
         showTicks: true,

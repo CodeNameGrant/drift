@@ -37,7 +37,7 @@ const DebtDistributionPieChart: React.FC<DebtDistributionPieChartProps> = ({ acc
     }];
   }, [accounts, hiddenTypes]);
 
-  // Chart configuration for pie chart
+  // Chart configuration
   const primaryAxis = useMemo(
     () => ({
       getValue: (datum: any) => datum.primary,
@@ -50,8 +50,7 @@ const DebtDistributionPieChart: React.FC<DebtDistributionPieChartProps> = ({ acc
     () => [
       {
         getValue: (datum: any) => datum.secondary,
-        type: 'linear' as const,
-        elementType: 'pie' as const
+        type: 'linear' as const
       }
     ],
     []
