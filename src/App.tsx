@@ -160,7 +160,7 @@ function App() {
           </header>
 
           {/* Main content */}
-          <main className="container mx-auto py-12 px-4">
+          <main className="container mx-auto py-6 px-4">
             <LoanCalculator />
           </main>
 
