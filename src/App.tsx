@@ -139,13 +139,19 @@ function App() {
     <CurrencyProvider>
       <AuthProvider>
         <div className="min-h-screen bg-appBackground-light dark:bg-appBackground-dark text-gray-900 dark:text-white transition-colors duration-300">
-          {/* Header with navigation and auth */}
+          {/* Header with left-aligned app name and right-aligned tools */}
           <header className="border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm sticky top-0 z-40">
             <div className="flex items-center justify-between p-4 max-w-7xl mx-auto">
-              <div className="flex items-center gap-4">
-                <CurrencySelector />
+              {/* Left side - App Name */}
+              <div className="flex items-center">
+                <h1 className="text-2xl font-bold text-primary dark:text-primary-light tracking-tight">
+                  Drift
+                </h1>
               </div>
+
+              {/* Right side - Tools */}
               <div className="flex items-center gap-3">
+                <CurrencySelector />
                 <AuthStatus onShowAuth={handleShowAuth} />
                 <GitHubLink />
                 <ThemeToggle theme={theme} toggleTheme={toggleTheme} />

@@ -26,9 +26,6 @@ const LoanCalculator: React.FC = () => {
   return (
     <div className="w-full max-w-7xl mx-auto p-6" data-testid="loan-calculator">
       <div className="text-center mb-12">
-        <h1 className="text-5xl font-extrabold text-gray-900 dark:text-white mb-3 tracking-tight">
-          Drift
-        </h1>
         <p className="text-lg text-gray-600 dark:text-gray-400 mt-2">
           Advanced loan simulation with payment scenario analysis
         </p>
