@@ -69,6 +69,7 @@ const AccountCard: React.FC<AccountCardProps> = ({ account }) => {
   const Icon = getAccountIcon(account.type);
   const color = getAccountColor(account.type);
   const typeLabel = getTypeLabel(account.type);
+  console.log('account', { Icon, color, typeLabel})
   
   // Calculate progress percentage
   const progressPercentage = ((account.originalAmount - account.currentBalance) / account.originalAmount) * 100;
