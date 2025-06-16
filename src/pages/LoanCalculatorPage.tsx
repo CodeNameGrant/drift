@@ -1,5 +1,5 @@
 import React from 'react';
-import LoanCalculator from '../components/LoanCalculator';
+import LoanCalculator from '../components/LoanCalculator/LoanCalculator';
 import { Calculator } from 'lucide-react';
 
 /**

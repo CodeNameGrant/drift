@@ -3,8 +3,8 @@ import LoanForm from './LoanForm';
 import ResultsDisplay from './ResultsDisplay';
 import LoanChart from './LoanChart';
 import ComparisonTable from './ComparisonTable';
-import { LoanFormData, LoanResult } from '../types';
-import { calculateLoan } from '../utils/calculations';
+import { LoanFormData, LoanResult } from '../../types';
+import { calculateLoan } from '../../utils/calculations';
 
 /**
  * Main loan calculator component orchestrating form, results, chart, and comparison table

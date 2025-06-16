@@ -1,7 +1,7 @@
 import React from 'react';
-import { LoanResult } from '../types';
-import { formatCurrency, formatDate, formatPercentage } from '../utils/calculations';
-import { useCurrency } from '../context/CurrencyContext';
+import { LoanResult } from '../../types';
+import { formatCurrency, formatDate, formatPercentage } from '../../utils/calculations';
+import { useCurrency } from '../../context/CurrencyContext';
 import { TrendingDown, Calendar, DollarSign, Percent } from 'lucide-react';
 
 interface ResultsDisplayProps {

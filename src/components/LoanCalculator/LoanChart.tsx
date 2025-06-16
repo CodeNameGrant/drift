@@ -1,8 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { Chart } from 'react-charts';
-import { LoanResult, ChartDataPoint } from '../types';
-import { generateChartData, formatCurrency, formatDate } from '../utils/calculations';
-import { useCurrency } from '../context/CurrencyContext';
+import { LoanResult, ChartDataPoint } from '../../types';
+import { generateChartData, formatCurrency, formatDate } from '../../utils/calculations';
+import { useCurrency } from '../../context/CurrencyContext';
 import { TrendingDown, Info } from 'lucide-react';
 
 interface LoanChartProps {
