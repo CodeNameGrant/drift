@@ -9,8 +9,8 @@ export const debtAccountTypes: DebtAccountType[] = [
   { type: 'mortgage', label: 'Mortgage', color: '#3B82F6', icon: 'home' },
   { type: 'auto', label: 'Auto Loan', color: '#10B981', icon: 'car' },
   { type: 'credit_card', label: 'Credit Card', color: '#F59E0B', icon: 'credit-card' },
-  { type: 'personal', label: 'Personal Loan', color: '#8B5CF6', icon: 'user' },
-  { type: 'student', label: 'Student Loan', color: '#06B6D4', icon: 'graduation-cap' },
+  { type: 'personal', label: 'Personal Loan', color: '#4F46E5', icon: 'user' },
+  { type: 'student', label: 'Student Loan', color: '#0D9488', icon: 'graduation-cap' },
   { type: 'business', label: 'Business Loan', color: '#EF4444', icon: 'briefcase' }
 ];
 

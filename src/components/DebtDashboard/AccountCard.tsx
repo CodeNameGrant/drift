@@ -40,14 +40,14 @@ const AccountCard: React.FC<AccountCardProps> = ({ account }) => {
     return iconMap[type] || CreditCard;
   };
 
-  // Color mapping for account types
+  // Color mapping for account types with improved contrast
   const getAccountColor = (type: DebtAccount['type']) => {
     const colorMap = {
       mortgage: 'blue',
       auto: 'green',
       credit_card: 'orange',
-      personal: 'purple',
-      student: 'cyan',
+      personal: 'indigo',
+      student: 'teal',
       business: 'red'
     };
     return colorMap[type] || 'gray';
@@ -101,14 +101,14 @@ const AccountCard: React.FC<AccountCardProps> = ({ account }) => {
         </div>
         <div className="flex gap-2">
           <button
-            className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+            className="p-2 text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 transition-colors duration-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
             aria-label="View account details"
             data-testid={`view-account-${account.id}`}
           >
             <Eye className="h-4 w-4" />
           </button>
           <button
-            className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+            className="p-2 text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 transition-colors duration-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
             aria-label="Edit account"
             data-testid={`edit-account-${account.id}`}
           >
