@@ -57,6 +57,7 @@ const InterestRateBarChart: React.FC<InterestRateBarChartProps> = ({ accounts })
         getValue: (datum: any) => datum.secondary,
         type: 'linear' as const,
         position: 'left' as const,
+        elementType: 'bar' as const,
         show: true,
         showGrid: true,
         showTicks: true,
