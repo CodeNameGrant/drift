@@ -12,7 +12,7 @@ interface AccountsListProps {
  * Features prominent "Add New Account" button and empty state handling
  */
 const AccountsList: React.FC<AccountsListProps> = ({ accounts }) => {
-  const activeAccounts = accounts.filter(account => account.isActive);
+  const activeAccounts = []; //accounts.filter(account => account.isActive);
 
   return (
     <div className="space-y-6" data-testid="accounts-list">
