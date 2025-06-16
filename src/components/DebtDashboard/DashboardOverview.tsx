@@ -2,9 +2,7 @@ import React from 'react';
 import { TrendingDown, CreditCard, Calendar, Percent, DollarSign, TrendingUp } from 'lucide-react';
 import { formatCurrency, formatPercentage, formatDate } from '../../utils/calculations';
 import { useCurrency } from '../../context/CurrencyContext';
-import DebtDistributionPieChart from './DebtDistributionPieChart';
-import DebtReductionLineChart from './DebtReductionLineChart';
-import InterestRateBarChart from './InterestRateBarChart';
+import VisualizationSection from './VisualizationSection';
 import { DebtAccount } from '../../types/debt';
 
 interface DashboardOverviewProps {
@@ -21,7 +19,7 @@ interface DashboardOverviewProps {
 
 /**
  * Dashboard overview component displaying key debt metrics and visualizations
- * Features responsive cards, metric highlights, and interactive charts
+ * Features responsive cards, metric highlights, and interactive chart selector
  */
 const DashboardOverview: React.FC<DashboardOverviewProps> = ({ summary, accounts }) => {
   const { currency } = useCurrency();
@@ -144,17 +142,8 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = ({ summary, accounts
         </div>
       </div>
 
-      {/* Data Visualizations */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Pie Chart */}
-        <DebtDistributionPieChart accounts={accounts} />
-        
-        {/* Line Chart */}
-        <DebtReductionLineChart accounts={accounts} />
-        
-        {/* Bar Chart */}
-        <InterestRateBarChart accounts={accounts} />
-      </div>
+      {/* Interactive Data Visualizations */}
+      <VisualizationSection accounts={accounts} />
     </div>
   );
 };
