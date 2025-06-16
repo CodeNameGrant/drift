@@ -135,29 +135,33 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ result }) => {
 
   return (
     <div className="w-full space-y-6" data-testid="results-display">
-      {activeScenarios.length > 1 && (<div className="text-center">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-          Loan Payment Scenarios
-        </h2>
-        <p className="text-gray-600 dark:text-gray-400">
-          {activeScenarios.length === 1 
-            ? 'Your base loan scenario' 
-            : `Compare ${activeScenarios.length} payment scenarios and see how extra payments affect your loan`
-          }
-        </p>
-      </div>
-
-      <div className={`grid gap-6 ${
-        activeScenarios.length === 1 
-          ? 'md:grid-cols-1 lg:grid-cols-1 max-w-md mx-auto' 
-          : activeScenarios.length === 2 
-          ? 'md:grid-cols-1 lg:grid-cols-2' 
-          : 'md:grid-cols-1 lg:grid-cols-3'
-      }`}>
-        {activeScenarios.map((scenario, index) => 
-          renderScenarioCard(scenario, index === 0)
-        )}
-      </div>)}
+      {activeScenarios.length > 1 && (
+        <>
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+              Loan Payment Scenarios
+            </h2>
+            <p className="text-gray-600 dark:text-gray-400">
+              {activeScenarios.length === 1 
+                ? 'Your base loan scenario' 
+                : `Compare ${activeScenarios.length} payment scenarios and see how extra payments affect your loan`
+              }
+            </p>
+          </div>
+    
+          <div className={`grid gap-6 ${
+            activeScenarios.length === 1 
+              ? 'md:grid-cols-1 lg:grid-cols-1 max-w-md mx-auto' 
+              : activeScenarios.length === 2 
+              ? 'md:grid-cols-1 lg:grid-cols-2' 
+              : 'md:grid-cols-1 lg:grid-cols-3'
+          }`}>
+            {activeScenarios.map((scenario, index) => 
+              renderScenarioCard(scenario, index === 0)
+            )}
+          </div>
+        </>
+      )}
 
       {/* Summary Comparison - Only show if there are simulations */}
       {activeScenarios.length > 1 && (
