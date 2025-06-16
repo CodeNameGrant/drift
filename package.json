@@ -14,7 +14,8 @@
     "lucide-react": "^0.344.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-charts": "^3.0.0-beta.57"
+    "react-charts": "^3.0.0-beta.57",
+    "react-router-dom": "^6.20.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.1",

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { LoanFormData, FormErrors } from '../types';
-import { validateForm, formatCurrency } from '../utils/calculations';
-import { useCurrency } from '../context/CurrencyContext';
+import { LoanFormData, FormErrors } from '../../types';
+import { validateForm, formatCurrency } from '../../utils/calculations';
+import { useCurrency } from '../../context/CurrencyContext';
 import { Calculator, Plus, DollarSign, Percent, Calendar, Clock, Lock, CheckCircle } from 'lucide-react';
 
 interface LoanFormProps {
