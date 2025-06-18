@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Home, 
   Car, 
@@ -10,22 +10,28 @@ import {
   Edit,
   Calendar,
   Percent,
-  DollarSign
+  DollarSign,
+  Trash2,
+  AlertTriangle
 } from 'lucide-react';
 import { DebtAccount } from '../../types/debt';
 import { formatCurrency, formatPercentage, formatDate } from '../../utils/calculations';
 import { useCurrency } from '../../context/CurrencyContext';
+import { DebtService } from '../../services/debtService';
 
 interface AccountCardProps {
   account: DebtAccount;
+  onAccountUpdated: () => void;
 }
 
 /**
  * Individual debt account card component
- * Displays account details, progress, and action buttons
+ * Displays account details, progress, and action buttons with delete functionality
  */
-const AccountCard: React.FC<AccountCardProps> = ({ account }) => {
+const AccountCard: React.FC<AccountCardProps> = ({ account, onAccountUpdated }) => {
   const { currency } = useCurrency();
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   // Icon mapping for account types
   const getAccountIcon = (type: DebtAccount['type']) => {
@@ -109,22 +115,39 @@ const AccountCard: React.FC<AccountCardProps> = ({ account }) => {
     return styleMap[type] || styleMap.credit_card;
   };
 
+  /**
+   * Handle account deletion
+   */
+  const handleDelete = async () => {
+    setDeleting(true);
+    try {
+      await DebtService.deleteDebtAccount(account.id);
+      onAccountUpdated();
+      setShowDeleteConfirm(false);
+    } catch (error) {
+      console.error('Error deleting account:', error);
+      // You might want to show an error toast here
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   const Icon = getAccountIcon(account.type);
   const typeLabel = getTypeLabel(account.type);
   const styles = getAccountStyles(account.type);
   
   // Calculate progress percentage
-  const progressPercentage = ((account.originalAmount - account.currentBalance) / account.originalAmount) * 100;
+  const progressPercentage = ((account.original_amount - account.current_balance) / account.original_amount) * 100;
   
   // Calculate time remaining
   const monthsRemaining = Math.ceil(
-    (account.payoffDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24 * 30)
+    (account.payoff_date.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24 * 30)
   );
   const yearsRemaining = (monthsRemaining / 12).toFixed(1);
 
   return (
     <div 
-      className={`bg-white dark:bg-gray-800 rounded-lg shadow-lg border-l-4 ${styles.borderColor} p-6 transition-all duration-300 hover:shadow-xl`}
+      className={`bg-white dark:bg-gray-800 rounded-lg shadow-lg border-l-4 ${styles.borderColor} p-6 transition-all duration-300 hover:shadow-xl relative`}
       data-testid={`account-card-${account.id}`}
     >
       {/* Header */}
@@ -157,6 +180,14 @@ const AccountCard: React.FC<AccountCardProps> = ({ account }) => {
           >
             <Edit className="h-4 w-4" />
           </button>
+          <button
+            onClick={() => setShowDeleteConfirm(true)}
+            className="p-2 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-200 transition-colors duration-200 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20"
+            aria-label="Delete account"
+            data-testid={`delete-account-${account.id}`}
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
         </div>
       </div>
 
@@ -165,7 +196,7 @@ const AccountCard: React.FC<AccountCardProps> = ({ account }) => {
         <div className="flex items-center justify-between mb-2">
           <span className="text-sm text-gray-600 dark:text-gray-400">Current Balance</span>
           <span className="text-xl font-bold text-gray-900 dark:text-white">
-            {formatCurrency(account.currentBalance, currency.code)}
+            {formatCurrency(account.current_balance, currency.code)}
           </span>
         </div>
         
@@ -178,7 +209,7 @@ const AccountCard: React.FC<AccountCardProps> = ({ account }) => {
         </div>
         <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
           <span>{progressPercentage.toFixed(1)}% paid off</span>
-          <span>{formatCurrency(account.originalAmount, currency.code, false)} original</span>
+          <span>{formatCurrency(account.original_amount, currency.code, false)} original</span>
         </div>
       </div>
 
@@ -190,11 +221,11 @@ const AccountCard: React.FC<AccountCardProps> = ({ account }) => {
             <span className="text-xs text-gray-500 dark:text-gray-400">Monthly Payment</span>
           </div>
           <p className="text-sm font-semibold text-gray-900 dark:text-white">
-            {formatCurrency(account.monthlyPayment, currency.code)}
+            {formatCurrency(account.monthly_payment, currency.code)}
           </p>
-          {account.extraPayment && (
+          {account.extra_payment && account.extra_payment > 0 && (
             <p className="text-xs text-green-600 dark:text-green-400">
-              +{formatCurrency(account.extraPayment, currency.code, false)} extra
+              +{formatCurrency(account.extra_payment, currency.code, false)} extra
             </p>
           )}
         </div>
@@ -205,7 +236,7 @@ const AccountCard: React.FC<AccountCardProps> = ({ account }) => {
             <span className="text-xs text-gray-500 dark:text-gray-400">Interest Rate</span>
           </div>
           <p className="text-sm font-semibold text-gray-900 dark:text-white">
-            {formatPercentage(account.interestRate)} APR
+            {formatPercentage(account.interest_rate)} APR
           </p>
         </div>
 
@@ -215,7 +246,7 @@ const AccountCard: React.FC<AccountCardProps> = ({ account }) => {
             <span className="text-xs text-gray-500 dark:text-gray-400">Payoff Date</span>
           </div>
           <p className="text-sm font-semibold text-gray-900 dark:text-white">
-            {formatDate(account.payoffDate)}
+            {formatDate(account.payoff_date)}
           </p>
         </div>
 
@@ -245,6 +276,59 @@ const AccountCard: React.FC<AccountCardProps> = ({ account }) => {
           Edit Account
         </button>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 max-w-md w-full">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
+                <AlertTriangle className="h-6 w-6 text-red-600 dark:text-red-400" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  Delete Account
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  This action cannot be undone
+                </p>
+              </div>
+            </div>
+            
+            <p className="text-gray-700 dark:text-gray-300 mb-6">
+              Are you sure you want to delete "{account.name}"? This will remove the account 
+              from your dashboard and cannot be undone.
+            </p>
+            
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={deleting}
+                className="flex-1 py-2 px-4 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-white rounded-lg text-sm font-medium transition-colors duration-200 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className="flex-1 py-2 px-4 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition-colors duration-200 disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {deleting ? (
+                  <>
+                    <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="h-3 w-3" />
+                    Delete
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
