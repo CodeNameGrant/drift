@@ -137,7 +137,7 @@ const AccountCard: React.FC<AccountCardProps> = ({ account, onAccountUpdated }) 
   const styles = getAccountStyles(account.type);
   
   // Calculate progress percentage
-  const progressPercentage = ((account.original_amount - account.current_balance) / account.original_amount) * 100;
+  const progressPercentage = ((account.loan_amount - account.current_balance) / account.loan_amount) * 100;
   
   // Calculate time remaining
   const monthsRemaining = Math.ceil(
@@ -209,7 +209,7 @@ const AccountCard: React.FC<AccountCardProps> = ({ account, onAccountUpdated }) 
         </div>
         <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
           <span>{progressPercentage.toFixed(1)}% paid off</span>
-          <span>{formatCurrency(account.original_amount, currency.code, false)} original</span>
+          <span>{formatCurrency(account.loan_amount, currency.code, false)} original</span>
         </div>
       </div>
 
@@ -223,11 +223,6 @@ const AccountCard: React.FC<AccountCardProps> = ({ account, onAccountUpdated }) 
           <p className="text-sm font-semibold text-gray-900 dark:text-white">
             {formatCurrency(account.monthly_payment, currency.code)}
           </p>
-          {account.extra_payment && account.extra_payment > 0 && (
-            <p className="text-xs text-green-600 dark:text-green-400">
-              +{formatCurrency(account.extra_payment, currency.code, false)} extra
-            </p>
-          )}
         </div>
 
         <div>

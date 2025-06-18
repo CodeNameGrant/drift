@@ -36,7 +36,7 @@ export const calculateDebtSummary = (accounts: DebtAccount[]): DebtSummary => {
     : 0;
   
   const totalPaid = activeAccounts.reduce(
-    (sum, account) => sum + (account.original_amount - account.current_balance), 0
+    (sum, account) => sum + (account.loan_amount - account.current_balance), 0
   );
   
   // Find the latest payoff date
@@ -98,11 +98,8 @@ export const calculateAvalancheSavings = (accounts: DebtAccount[]): {
 } => {
   // This is a simplified calculation - in a real app you'd want more sophisticated modeling
   const activeAccounts = accounts.filter(account => account.is_active);
-  const totalExtraPayments = activeAccounts.reduce(
-    (sum, account) => sum + (account.extra_payment || 0), 0
-  );
   
-  if (totalExtraPayments === 0) {
+  if (activeAccounts.length === 0) {
     return { totalInterestSaved: 0, monthsSaved: 0 };
   }
   

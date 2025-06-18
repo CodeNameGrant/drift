@@ -14,11 +14,13 @@ import {
   Briefcase,
   AlertCircle,
   CheckCircle,
-  Loader2
+  Loader2,
+  Calculator
 } from 'lucide-react';
 import { CreateDebtAccountData, DebtAccountFormErrors } from '../../types/debt';
 import { DebtService } from '../../services/debtService';
 import { formatCurrency } from '../../utils/calculations';
+import { calculateCurrentBalance, calculatePayoffDate, validatePaymentCoverage } from '../../utils/loanCalculations';
 import { useCurrency } from '../../context/CurrencyContext';
 
 interface AddDebtAccountFormProps {
@@ -29,7 +31,7 @@ interface AddDebtAccountFormProps {
 
 /**
  * Form component for adding new debt accounts
- * Features comprehensive validation, type selection, and responsive design
+ * Features loan amount input, start date, and automatic current balance calculation
  */
 const AddDebtAccountForm: React.FC<AddDebtAccountFormProps> = ({ 
   isOpen, 
@@ -44,14 +46,26 @@ const AddDebtAccountForm: React.FC<AddDebtAccountFormProps> = ({
   const [formData, setFormData] = useState<CreateDebtAccountData>({
     name: '',
     type: 'credit_card',
-    current_balance: 0,
-    original_amount: 0,
+    loan_amount: 0,
     monthly_payment: 0,
     interest_rate: 0,
-    payoff_date: new Date(),
-    minimum_payment: 0,
-    extra_payment: 0
+    start_date: new Date(),
+    minimum_payment: 0
   });
+
+  // Calculate derived values for preview
+  const currentBalance = formData.loan_amount > 0 && formData.monthly_payment > 0 && formData.interest_rate >= 0
+    ? calculateCurrentBalance(
+        formData.loan_amount,
+        formData.monthly_payment,
+        formData.interest_rate,
+        formData.start_date
+      )
+    : formData.loan_amount;
+
+  const projectedPayoffDate = currentBalance > 0 && formData.monthly_payment > 0
+    ? calculatePayoffDate(currentBalance, formData.monthly_payment, formData.interest_rate)
+    : new Date();
 
   // Account type options with icons
   const accountTypes = [
@@ -75,14 +89,8 @@ const AddDebtAccountForm: React.FC<AddDebtAccountFormProps> = ({
       newErrors.name = 'Account name must be at least 2 characters';
     }
 
-    if (formData.current_balance <= 0) {
-      newErrors.current_balance = 'Current balance must be greater than 0';
-    }
-
-    if (formData.original_amount <= 0) {
-      newErrors.original_amount = 'Original amount must be greater than 0';
-    } else if (formData.current_balance > formData.original_amount) {
-      newErrors.current_balance = 'Current balance cannot exceed original amount';
+    if (formData.loan_amount <= 0) {
+      newErrors.loan_amount = 'Loan amount must be greater than 0';
     }
 
     if (formData.monthly_payment <= 0) {
@@ -99,14 +107,27 @@ const AddDebtAccountForm: React.FC<AddDebtAccountFormProps> = ({
       newErrors.interest_rate = 'Interest rate must be between 0% and 100%';
     }
 
-    if (formData.extra_payment && formData.extra_payment < 0) {
-      newErrors.extra_payment = 'Extra payment cannot be negative';
+    // Validate that payment can cover interest
+    if (formData.loan_amount > 0 && formData.monthly_payment > 0 && formData.interest_rate > 0) {
+      const paymentValidation = validatePaymentCoverage(
+        currentBalance,
+        formData.monthly_payment,
+        formData.interest_rate
+      );
+      
+      if (!paymentValidation.isValid) {
+        newErrors.monthly_payment = `Payment must be at least ${formatCurrency(paymentValidation.minimumRequired, currency.code)} to cover interest`;
+      }
     }
 
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    if (formData.payoff_date <= today) {
-      newErrors.payoff_date = 'Payoff date must be in the future';
+    const maxPastDate = new Date();
+    maxPastDate.setFullYear(maxPastDate.getFullYear() - 30); // 30 years ago max
+
+    if (formData.start_date > today) {
+      newErrors.start_date = 'Start date cannot be in the future';
+    } else if (formData.start_date < maxPastDate) {
+      newErrors.start_date = 'Start date cannot be more than 30 years ago';
     }
 
     setErrors(newErrors);
@@ -121,9 +142,7 @@ const AddDebtAccountForm: React.FC<AddDebtAccountFormProps> = ({
     
     setTouched(prev => ({ ...prev, [name]: true }));
 
-    if (name === 'current_balance' || name === 'original_amount' || 
-        name === 'monthly_payment' || name === 'minimum_payment' || 
-        name === 'extra_payment') {
+    if (name === 'loan_amount' || name === 'monthly_payment' || name === 'minimum_payment') {
       setFormData(prev => ({
         ...prev,
         [name]: parseFloat(value.replace(/\D/g, '') || '0')
@@ -133,7 +152,7 @@ const AddDebtAccountForm: React.FC<AddDebtAccountFormProps> = ({
         ...prev,
         [name]: parseFloat(value) || 0
       }));
-    } else if (name === 'payoff_date') {
+    } else if (name === 'start_date') {
       setFormData(prev => ({
         ...prev,
         [name]: new Date(value)
@@ -173,13 +192,11 @@ const AddDebtAccountForm: React.FC<AddDebtAccountFormProps> = ({
       setFormData({
         name: '',
         type: 'credit_card',
-        current_balance: 0,
-        original_amount: 0,
+        loan_amount: 0,
         monthly_payment: 0,
         interest_rate: 0,
-        payoff_date: new Date(),
-        minimum_payment: 0,
-        extra_payment: 0
+        start_date: new Date(),
+        minimum_payment: 0
       });
       setErrors({});
       setTouched({});
@@ -203,13 +220,11 @@ const AddDebtAccountForm: React.FC<AddDebtAccountFormProps> = ({
     setFormData({
       name: '',
       type: 'credit_card',
-      current_balance: 0,
-      original_amount: 0,
+      loan_amount: 0,
       monthly_payment: 0,
       interest_rate: 0,
-      payoff_date: new Date(),
-      minimum_payment: 0,
-      extra_payment: 0
+      start_date: new Date(),
+      minimum_payment: 0
     });
     setErrors({});
     setTouched({});
@@ -250,7 +265,7 @@ const AddDebtAccountForm: React.FC<AddDebtAccountFormProps> = ({
                   Add New Debt Account
                 </h2>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Track a new debt account and monitor your progress
+                  Enter your loan details and we'll calculate the current balance
                 </p>
               </div>
             </div>
@@ -304,66 +319,62 @@ const AddDebtAccountForm: React.FC<AddDebtAccountFormProps> = ({
                   className={inputClasses('type')}
                   data-testid="account-type-select"
                 >
-                  {accountTypes.map((type) => {
-                    const Icon = type.icon;
-                    return (
-                      <option key={type.value} value={type.value}>
-                        {type.label}
-                      </option>
-                    );
-                  })}
+                  {accountTypes.map((type) => (
+                    <option key={type.value} value={type.value}>
+                      {type.label}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
 
-            {/* Balance Information */}
+            {/* Loan Details */}
             <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
               <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">
-                Balance Information
+                Loan Details
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label htmlFor="original_amount" className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label htmlFor="loan_amount" className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                     <DollarSign className="h-4 w-4 text-gray-500" />
-                    Original Amount
+                    Original Loan Amount
                   </label>
                   <input
                     type="text"
-                    name="original_amount"
-                    id="original_amount"
-                    value={formatCurrency(formData.original_amount, currency.code, false)}
+                    name="loan_amount"
+                    id="loan_amount"
+                    value={formatCurrency(formData.loan_amount, currency.code, false)}
                     onChange={handleInputChange}
-                    className={inputClasses('original_amount')}
+                    className={inputClasses('loan_amount')}
                     placeholder="Enter original loan amount"
-                    data-testid="original-amount-input"
+                    data-testid="loan-amount-input"
                   />
-                  {touched.original_amount && errors.original_amount && (
+                  {touched.loan_amount && errors.loan_amount && (
                     <p className="text-sm text-red-500 flex items-center gap-1">
                       <AlertCircle className="h-3 w-3" />
-                      {errors.original_amount}
+                      {errors.loan_amount}
                     </p>
                   )}
                 </div>
 
                 <div className="space-y-2">
-                  <label htmlFor="current_balance" className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                    <DollarSign className="h-4 w-4 text-gray-500" />
-                    Current Balance
+                  <label htmlFor="start_date" className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <Calendar className="h-4 w-4 text-gray-500" />
+                    Loan Start Date
                   </label>
                   <input
-                    type="text"
-                    name="current_balance"
-                    id="current_balance"
-                    value={formatCurrency(formData.current_balance, currency.code, false)}
+                    type="date"
+                    name="start_date"
+                    id="start_date"
+                    value={formData.start_date.toISOString().split('T')[0]}
                     onChange={handleInputChange}
-                    className={inputClasses('current_balance')}
-                    placeholder="Enter current balance"
-                    data-testid="current-balance-input"
+                    className={inputClasses('start_date')}
+                    data-testid="start-date-input"
                   />
-                  {touched.current_balance && errors.current_balance && (
+                  {touched.start_date && errors.start_date && (
                     <p className="text-sm text-red-500 flex items-center gap-1">
                       <AlertCircle className="h-3 w-3" />
-                      {errors.current_balance}
+                      {errors.start_date}
                     </p>
                   )}
                 </div>
@@ -423,80 +434,61 @@ const AddDebtAccountForm: React.FC<AddDebtAccountFormProps> = ({
                 </div>
 
                 <div className="space-y-2">
-                  <label htmlFor="extra_payment" className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                    <Plus className="h-4 w-4 text-gray-500" />
-                    Extra Payment
+                  <label htmlFor="interest_rate" className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <Percent className="h-4 w-4 text-gray-500" />
+                    Interest Rate (%)
                   </label>
                   <input
-                    type="text"
-                    name="extra_payment"
-                    id="extra_payment"
-                    value={formatCurrency(formData.extra_payment || 0, currency.code, false)}
+                    type="number"
+                    name="interest_rate"
+                    id="interest_rate"
+                    value={formData.interest_rate || ''}
                     onChange={handleInputChange}
-                    className={inputClasses('extra_payment')}
-                    placeholder="Optional extra payment"
-                    data-testid="extra-payment-input"
+                    min="0"
+                    max="100"
+                    step="0.01"
+                    className={inputClasses('interest_rate')}
+                    placeholder="e.g., 18.99"
+                    data-testid="interest-rate-input"
                   />
-                  {touched.extra_payment && errors.extra_payment && (
+                  {touched.interest_rate && errors.interest_rate && (
                     <p className="text-sm text-red-500 flex items-center gap-1">
                       <AlertCircle className="h-3 w-3" />
-                      {errors.extra_payment}
+                      {errors.interest_rate}
                     </p>
                   )}
                 </div>
               </div>
             </div>
 
-            {/* Interest Rate and Payoff Date */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <label htmlFor="interest_rate" className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                  <Percent className="h-4 w-4 text-gray-500" />
-                  Interest Rate (%)
-                </label>
-                <input
-                  type="number"
-                  name="interest_rate"
-                  id="interest_rate"
-                  value={formData.interest_rate || ''}
-                  onChange={handleInputChange}
-                  min="0"
-                  max="100"
-                  step="0.01"
-                  className={inputClasses('interest_rate')}
-                  placeholder="e.g., 18.99"
-                  data-testid="interest-rate-input"
-                />
-                {touched.interest_rate && errors.interest_rate && (
-                  <p className="text-sm text-red-500 flex items-center gap-1">
-                    <AlertCircle className="h-3 w-3" />
-                    {errors.interest_rate}
-                  </p>
-                )}
+            {/* Calculated Values Preview */}
+            {formData.loan_amount > 0 && (
+              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <Calculator className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  <h3 className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                    Calculated Values
+                  </h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="text-blue-700 dark:text-blue-300">Current Balance:</span>
+                    <div className="font-semibold text-blue-900 dark:text-blue-100">
+                      {formatCurrency(currentBalance, currency.code)}
+                    </div>
+                  </div>
+                  <div>
+                    <span className="text-blue-700 dark:text-blue-300">Projected Payoff:</span>
+                    <div className="font-semibold text-blue-900 dark:text-blue-100">
+                      {projectedPayoffDate.toLocaleDateString()}
+                    </div>
+                  </div>
+                </div>
+                <p className="text-xs text-blue-600 dark:text-blue-400 mt-2">
+                  These values are calculated based on your loan details and payment history.
+                </p>
               </div>
-
-              <div className="space-y-2">
-                <label htmlFor="payoff_date" className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                  <Calendar className="h-4 w-4 text-gray-500" />
-                  Expected Payoff Date
-                </label>
-                <input
-                  type="date"
-                  name="payoff_date"
-                  id="payoff_date"
-                  value={formData.payoff_date.toISOString().split('T')[0]}
-                  onChange={handleInputChange}
-                  className={inputClasses('payoff_date')}
-                  data-testid="payoff-date-input"
-                />
-                {touched.payoff_date && errors.payoff_date && (
-                  <p className="text-sm text-red-500 flex items-center gap-1">
-                    <AlertCircle className="h-3 w-3" />
-                    {errors.payoff_date}
-                  </p>
-                )}
-              </div>
-            </div>
+            )}
 
             {/* Form Actions */}
             <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
