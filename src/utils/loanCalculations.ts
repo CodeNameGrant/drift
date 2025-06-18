@@ -4,6 +4,31 @@
  */
 
 /**
+ * Calculate monthly payment for a fixed loan
+ */
+export const calculateMonthlyPayment = (
+  loanAmount: number,
+  annualInterestRate: number,
+  numberOfMonths: number
+): number => {
+  if (loanAmount <= 0 || numberOfMonths <= 0) {
+    return 0;
+  }
+
+  if (annualInterestRate === 0) {
+    return loanAmount / numberOfMonths;
+  }
+
+  const monthlyInterestRate = annualInterestRate / 100 / 12;
+  
+  const monthlyPayment = loanAmount * 
+    (monthlyInterestRate * Math.pow(1 + monthlyInterestRate, numberOfMonths)) / 
+    (Math.pow(1 + monthlyInterestRate, numberOfMonths) - 1);
+
+  return monthlyPayment;
+};
+
+/**
  * Calculate current balance based on loan amount, payments, and time elapsed
  */
 export const calculateCurrentBalance = (
@@ -132,4 +157,84 @@ export const calculateTotalInterest = (
   }
   
   return totalInterest;
+};
+
+/**
+ * Calculate loan-to-value ratio for mortgages
+ */
+export const calculateLoanToValueRatio = (
+  loanAmount: number,
+  propertyValue: number
+): number => {
+  if (propertyValue <= 0) return 0;
+  return (loanAmount / propertyValue) * 100;
+};
+
+/**
+ * Calculate debt service ratio (monthly payment to monthly income)
+ */
+export const calculateDebtServiceRatio = (
+  monthlyPayment: number,
+  monthlyIncome: number
+): number => {
+  if (monthlyIncome <= 0) return 0;
+  return (monthlyPayment / monthlyIncome) * 100;
+};
+
+/**
+ * Validate loan term based on account type
+ */
+export const validateLoanTerm = (
+  accountType: string,
+  termMonths: number
+): { isValid: boolean; message?: string } => {
+  const termLimits = {
+    mortgage: { min: 60, max: 360 }, // 5-30 years
+    auto: { min: 12, max: 84 }, // 1-7 years
+    personal: { min: 12, max: 84 }, // 1-7 years
+    student: { min: 60, max: 300 }, // 5-25 years
+    business: { min: 12, max: 120 } // 1-10 years
+  };
+
+  const limits = termLimits[accountType as keyof typeof termLimits];
+  
+  if (!limits) {
+    return { isValid: true };
+  }
+
+  if (termMonths < limits.min) {
+    return {
+      isValid: false,
+      message: `${accountType} loans typically have a minimum term of ${Math.ceil(limits.min / 12)} years`
+    };
+  }
+
+  if (termMonths > limits.max) {
+    return {
+      isValid: false,
+      message: `${accountType} loans typically have a maximum term of ${Math.floor(limits.max / 12)} years`
+    };
+  }
+
+  return { isValid: true };
+};
+
+/**
+ * Calculate effective annual rate (APR) including fees
+ */
+export const calculateEffectiveAnnualRate = (
+  loanAmount: number,
+  monthlyPayment: number,
+  numberOfMonths: number,
+  totalFees: number = 0
+): number => {
+  const totalPaid = monthlyPayment * numberOfMonths;
+  const totalCost = totalPaid + totalFees;
+  const totalInterest = totalCost - loanAmount;
+  
+  if (loanAmount <= 0 || numberOfMonths <= 0) return 0;
+  
+  // Simple approximation - for exact calculation would need iterative method
+  const monthlyRate = totalInterest / (loanAmount * numberOfMonths);
+  return monthlyRate * 12 * 100;
 };
