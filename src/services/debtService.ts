@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabaseClient';
-import { DebtAccount, CreateDebtAccountData, UpdateDebtAccountData } from '../types/debt';
+import { DebtAccount, CreateDebtAccountData, UpdateDebtAccountData, LoanEvent, CreateLoanEventData, LoanEventStats } from '../types/debt';
 import { calculateCurrentBalance, calculatePayoffDate } from '../utils/loanCalculations';
 
 /**
@@ -248,6 +248,260 @@ export class DebtService {
       };
     } catch (error) {
       console.error('Error in getDebtAccountById:', error);
+      throw error;
+    }
+  }
+
+  // ============================================================================
+  // LOAN EVENTS METHODS
+  // ============================================================================
+
+  /**
+   * Create a new loan event for a debt account
+   */
+  static async createLoanEvent(eventData: CreateLoanEventData): Promise<LoanEvent> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
+      // Prepare data for insertion
+      const insertData = {
+        ...eventData,
+        user_id: user.id,
+        event_date: eventData.event_date.toISOString().split('T')[0]
+      };
+
+      const { data, error } = await supabase
+        .from('loan_events')
+        .insert([insertData])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating loan event:', error);
+        throw new Error(`Failed to create loan event: ${error.message}`);
+      }
+
+      // Transform the response to match our LoanEvent interface
+      return {
+        ...data,
+        event_date: new Date(data.event_date),
+        created_at: new Date(data.created_at)
+      };
+    } catch (error) {
+      console.error('Error in createLoanEvent:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Fetch all loan events for a specific debt account
+   */
+  static async getLoanEventsByAccountId(debtAccountId: string): Promise<LoanEvent[]> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
+      const { data, error } = await supabase
+        .from('loan_events')
+        .select('*')
+        .eq('debt_account_id', debtAccountId)
+        .eq('user_id', user.id)
+        .order('event_date', { ascending: false })
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching loan events:', error);
+        throw new Error(`Failed to fetch loan events: ${error.message}`);
+      }
+
+      // Transform the data to match our LoanEvent interface
+      return (data || []).map(event => ({
+        ...event,
+        event_date: new Date(event.event_date),
+        created_at: new Date(event.created_at)
+      }));
+    } catch (error) {
+      console.error('Error in getLoanEventsByAccountId:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Fetch all loan events for the authenticated user across all accounts
+   */
+  static async getUserLoanEvents(): Promise<LoanEvent[]> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
+      const { data, error } = await supabase
+        .from('loan_events')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('event_date', { ascending: false })
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching user loan events:', error);
+        throw new Error(`Failed to fetch loan events: ${error.message}`);
+      }
+
+      // Transform the data to match our LoanEvent interface
+      return (data || []).map(event => ({
+        ...event,
+        event_date: new Date(event.event_date),
+        created_at: new Date(event.created_at)
+      }));
+    } catch (error) {
+      console.error('Error in getUserLoanEvents:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get loan event statistics for a specific debt account
+   */
+  static async getLoanEventStats(debtAccountId: string): Promise<LoanEventStats> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
+      const { data, error } = await supabase
+        .from('loan_events')
+        .select('event_type, event_data, event_date')
+        .eq('debt_account_id', debtAccountId)
+        .eq('user_id', user.id);
+
+      if (error) {
+        console.error('Error fetching loan event stats:', error);
+        throw new Error(`Failed to fetch loan event stats: ${error.message}`);
+      }
+
+      // Calculate statistics
+      const events = data || [];
+      const stats: LoanEventStats = {
+        total_events: events.length,
+        extra_payments_count: 0,
+        extra_payments_total: 0,
+        payment_skips_count: 0,
+        withdrawals_count: 0,
+        withdrawals_total: 0,
+        rate_changes_count: 0
+      };
+
+      let lastEventDate: Date | undefined;
+
+      events.forEach(event => {
+        const eventDate = new Date(event.event_date);
+        if (!lastEventDate || eventDate > lastEventDate) {
+          lastEventDate = eventDate;
+        }
+
+        switch (event.event_type) {
+          case 'extra_payment':
+            stats.extra_payments_count++;
+            stats.extra_payments_total += parseFloat(event.event_data.amount) || 0;
+            break;
+          case 'payment_skip':
+            stats.payment_skips_count++;
+            break;
+          case 'loan_withdrawal':
+            stats.withdrawals_count++;
+            stats.withdrawals_total += parseFloat(event.event_data.amount) || 0;
+            break;
+          case 'interest_rate_change':
+            stats.rate_changes_count++;
+            break;
+        }
+      });
+
+      if (lastEventDate) {
+        stats.last_event_date = lastEventDate;
+      }
+
+      return stats;
+    } catch (error) {
+      console.error('Error in getLoanEventStats:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Delete a loan event (soft delete by updating notes or hard delete if needed)
+   */
+  static async deleteLoanEvent(eventId: string): Promise<void> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
+      const { error } = await supabase
+        .from('loan_events')
+        .delete()
+        .eq('id', eventId)
+        .eq('user_id', user.id);
+
+      if (error) {
+        console.error('Error deleting loan event:', error);
+        throw new Error(`Failed to delete loan event: ${error.message}`);
+      }
+    } catch (error) {
+      console.error('Error in deleteLoanEvent:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Update loan event notes (only notes can be updated to maintain audit trail)
+   */
+  static async updateLoanEventNotes(eventId: string, notes: string): Promise<LoanEvent> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
+      const { data, error } = await supabase
+        .from('loan_events')
+        .update({ notes })
+        .eq('id', eventId)
+        .eq('user_id', user.id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error updating loan event notes:', error);
+        throw new Error(`Failed to update loan event notes: ${error.message}`);
+      }
+
+      if (!data) {
+        throw new Error('Loan event not found or you do not have permission to update it');
+      }
+
+      // Transform the response to match our LoanEvent interface
+      return {
+        ...data,
+        event_date: new Date(data.event_date),
+        created_at: new Date(data.created_at)
+      };
+    } catch (error) {
+      console.error('Error in updateLoanEventNotes:', error);
       throw error;
     }
   }
