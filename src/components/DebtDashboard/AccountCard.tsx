@@ -150,7 +150,7 @@ const timeRemianingParts = [];
 if (years) timeRemianingParts.push(`${years} year${years === 1 ? '' : 's'}`);
 if (months) timeRemianingParts.push(`${months} month${months === 1 ? '' : 's'}`);
 
-  const timeRemianingStr = parts.join(' / ') || '0 months';
+  const timeRemianingStr = timeRemianingParts.join(' / ') || '0 months';
   
   return (
     <div 
