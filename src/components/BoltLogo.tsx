@@ -18,7 +18,7 @@ const BoltLogo: React.FC = () => {
   return (
     <button
       onClick={handleLogoClick}
-      className="fixed top-20 right-4 z-40 flex items-center justify-center p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-gray-800 group hover:scale-105"
+      className="fixed top-20 right-4 z-40 flex items-center justify-center p-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-gray-800 group hover:scale-105"
       aria-label="Visit Bolt.new - Powered by Bolt"
       title="Visit Bolt.new"
       data-testid="bolt-logo-link"
