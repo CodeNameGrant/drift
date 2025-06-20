@@ -18,7 +18,7 @@ const BoltLogo: React.FC = () => {
   return (
     <button
       onClick={handleLogoClick}
-      className="fixed top-20 right-4 z-40 flex items-center justify-center p-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-gray-800 group hover:scale-105"
+      className="fixed top-20 right-4 z-40 flex items-center justify-center p-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-gray-800 group hover:scale-105"
       aria-label="Visit Bolt.new - Powered by Bolt"
       title="Visit Bolt.new"
       data-testid="bolt-logo-link"
@@ -27,7 +27,7 @@ const BoltLogo: React.FC = () => {
         WebkitBackdropFilter: 'blur(8px)'
       }}
     >
-      <div className="relative w-10 h-10 transition-transform duration-200">
+      <div className="relative w-12 h-12 transition-transform duration-200">
         <img
           src={theme === 'dark' ? '/white_circle_360x360.png' : '/black_circle_360x360.png'}
           alt="Bolt Logo"
