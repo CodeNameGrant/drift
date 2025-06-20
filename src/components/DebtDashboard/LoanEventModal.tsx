@@ -90,6 +90,11 @@ const LoanEventModal: React.FC<LoanEventModalProps> = ({
     }
   }, [isOpen, eventType, currentInterestRate, monthlyPayment, currentBalance]);
 
+  // Calculate new balance for loan withdrawal in real-time
+  const calculatedNewBalance = eventType === 'loan_withdrawal' 
+    ? currentBalance + formData.amount 
+    : formData.newBalance;
+
   /**
    * Get event type icon
    */
@@ -136,21 +141,14 @@ const LoanEventModal: React.FC<LoanEventModalProps> = ({
         break;
 
       case 'payment_skip':
-        if (!formData.scheduledPaymentAmount || formData.scheduledPaymentAmount <= 0) {
-          newErrors.scheduled_payment_amount = 'Scheduled payment amount must be greater than 0';
-        }
+        // No validation needed for scheduled payment amount since it's read-only
         break;
 
       case 'loan_withdrawal':
         if (!formData.amount || formData.amount <= 0) {
           newErrors.amount = 'Withdrawal amount must be greater than 0';
         }
-        if (formData.newBalance < 0) {
-          newErrors.new_balance = 'New balance cannot be negative';
-        }
-        if (formData.newBalance < currentBalance + formData.amount) {
-          newErrors.new_balance = 'New balance must be at least current balance plus withdrawal amount';
-        }
+        // No validation needed for new balance since it's auto-calculated
         break;
 
       case 'interest_rate_change':
@@ -221,12 +219,10 @@ const LoanEventModal: React.FC<LoanEventModalProps> = ({
         touchedFields.amount = true;
         break;
       case 'payment_skip':
-        touchedFields.scheduledPaymentAmount = true;
         touchedFields.reason = true;
         break;
       case 'loan_withdrawal':
         touchedFields.amount = true;
-        touchedFields.newBalance = true;
         break;
       case 'interest_rate_change':
         touchedFields.oldRate = true;
@@ -266,7 +262,7 @@ const LoanEventModal: React.FC<LoanEventModalProps> = ({
         case 'loan_withdrawal':
           eventData = {
             amount: formData.amount,
-            new_balance: formData.newBalance
+            new_balance: calculatedNewBalance // Use calculated value
           } as LoanWithdrawalEventData;
           break;
 
@@ -317,15 +313,28 @@ const LoanEventModal: React.FC<LoanEventModalProps> = ({
   /**
    * Generate input CSS classes
    */
-  const inputClasses = (fieldName: string) => `
+  const inputClasses = (fieldName: string, readOnly: boolean = false) => `
     block w-full rounded-lg py-3 px-4 
     text-gray-900 bg-white dark:bg-gray-800 dark:text-white 
     border ${touched[fieldName] && errors[fieldName as keyof LoanEventFormErrors]
       ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
+      : readOnly
+      ? 'border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700'
       : 'border-gray-300 dark:border-gray-700 focus:border-primary focus:ring-primary'
     } 
     focus:outline-none focus:ring-2 
     transition duration-200
+    ${readOnly ? 'cursor-not-allowed' : ''}
+  `;
+
+  /**
+   * Generate label CSS classes for read-only displays
+   */
+  const labelDisplayClasses = `
+    block w-full rounded-lg py-3 px-4 
+    text-gray-900 bg-gray-50 dark:bg-gray-700 dark:text-white 
+    border border-gray-200 dark:border-gray-600
+    font-medium
   `;
 
   if (!isOpen) return null;
@@ -470,22 +479,12 @@ const LoanEventModal: React.FC<LoanEventModalProps> = ({
                   <DollarSign className="h-4 w-4 text-gray-500" />
                   Scheduled Payment Amount
                 </label>
-                <input
-                  type="text"
-                  name="scheduledPaymentAmount"
-                  id="scheduledPaymentAmount"
-                  value={formData.scheduledPaymentAmount > 0 ? formatCurrency(formData.scheduledPaymentAmount, currency.code, false) : ''}
-                  onChange={handleInputChange}
-                  className={inputClasses('scheduledPaymentAmount')}
-                  placeholder="Enter scheduled payment amount"
-                  data-testid="scheduled-payment-input"
-                />
-                {touched.scheduledPaymentAmount && errors.scheduled_payment_amount && (
-                  <p className="text-sm text-red-500 flex items-center gap-1">
-                    <AlertCircle className="h-3 w-3" />
-                    {errors.scheduled_payment_amount}
-                  </p>
-                )}
+                <div className={labelDisplayClasses} data-testid="scheduled-payment-display">
+                  {formatCurrency(monthlyPayment, currency.code)}
+                </div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">
+                  This is your current scheduled monthly payment amount
+                </div>
               </div>
 
               <div className="space-y-2">
@@ -537,24 +536,11 @@ const LoanEventModal: React.FC<LoanEventModalProps> = ({
                   <DollarSign className="h-4 w-4 text-gray-500" />
                   New Balance After Withdrawal
                 </label>
-                <input
-                  type="text"
-                  name="newBalance"
-                  id="newBalance"
-                  value={formData.newBalance > 0 ? formatCurrency(formData.newBalance, currency.code, false) : ''}
-                  onChange={handleInputChange}
-                  className={inputClasses('newBalance')}
-                  placeholder="Enter new balance"
-                  data-testid="new-balance-input"
-                />
-                {touched.newBalance && errors.new_balance && (
-                  <p className="text-sm text-red-500 flex items-center gap-1">
-                    <AlertCircle className="h-3 w-3" />
-                    {errors.new_balance}
-                  </p>
-                )}
+                <div className={labelDisplayClasses} data-testid="new-balance-display">
+                  {formatCurrency(calculatedNewBalance, currency.code)}
+                </div>
                 <div className="text-xs text-gray-500 dark:text-gray-400">
-                  Current balance: {formatCurrency(currentBalance, currency.code)}
+                  Current balance: {formatCurrency(currentBalance, currency.code)} + Withdrawal: {formatCurrency(formData.amount, currency.code)}
                 </div>
               </div>
             </>
@@ -577,7 +563,7 @@ const LoanEventModal: React.FC<LoanEventModalProps> = ({
                     min="0"
                     max="100"
                     step="0.01"
-                    className={inputClasses('oldRate')}
+                    className={inputClasses('oldRate', true)}
                     placeholder="Current rate"
                     data-testid="old-rate-input"
                     readOnly
