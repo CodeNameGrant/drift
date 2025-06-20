@@ -68,6 +68,16 @@ const InterestRateBarChart: React.FC<InterestRateBarChartProps> = ({ accounts })
     []
   );
 
+  // Helper function to get color based on interest rate
+  const getInterestRateColor = (rate: number, maxRate: number): string => {
+    const intensity = rate / maxRate;
+    if (intensity > 0.8) return '#EF4444'; // High rate - red
+    if (intensity > 0.6) return '#F59E0B'; // Medium-high rate - orange
+    if (intensity > 0.4) return '#EAB308'; // Medium rate - yellow
+    if (intensity > 0.2) return '#22C55E'; // Low-medium rate - green
+    return '#3B82F6'; // Low rate - blue
+  };
+
   // Chart styling configuration with color intensity based on rate
   const getSeriesStyle = React.useCallback(
     (series: any) => {
@@ -75,14 +85,7 @@ const InterestRateBarChart: React.FC<InterestRateBarChartProps> = ({ accounts })
       const maxRate = Math.max(...chartData[0]?.data.map(d => d.secondary) || [0]);
       
       return {
-        color: (datum: any) => {
-          const intensity = datum.secondary / maxRate;
-          if (intensity > 0.8) return '#EF4444'; // High rate - red
-          if (intensity > 0.6) return '#F59E0B'; // Medium-high rate - orange
-          if (intensity > 0.4) return '#EAB308'; // Medium rate - yellow
-          if (intensity > 0.2) return '#22C55E'; // Low-medium rate - green
-          return '#3B82F6'; // Low rate - blue
-        }
+        color: (datum: any) => getInterestRateColor(datum.secondary, maxRate)
       };
     },
     [chartData]
@@ -122,13 +125,17 @@ const InterestRateBarChart: React.FC<InterestRateBarChartProps> = ({ accounts })
 
       const rateLevel = datum.secondary > 15 ? 'High' : datum.secondary > 8 ? 'Medium' : 'Low';
       const rateColor = datum.secondary > 15 ? 'text-red-600' : datum.secondary > 8 ? 'text-orange-600' : 'text-green-600';
+      
+      // Calculate the actual bar color based on interest rate (same logic as getSeriesStyle)
+      const maxRate = Math.max(...chartData[0]?.data.map(d => d.secondary) || [0]);
+      const actualBarColor = getInterestRateColor(datum.secondary, maxRate);
 
       return (
         <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-4 min-w-[220px]">
           <div className="flex items-center gap-2 mb-3">
             <div 
               className="w-3 h-3 rounded"
-              style={{ backgroundColor: datum.color }}
+              style={{ backgroundColor: actualBarColor }}
             />
             <span className="font-medium text-gray-900 dark:text-white">
               {datum.primary}
@@ -163,7 +170,7 @@ const InterestRateBarChart: React.FC<InterestRateBarChartProps> = ({ accounts })
         </div>
       );
     },
-    [currency]
+    [currency, chartData]
   );
 
   // Loading component
