@@ -140,11 +140,18 @@ const AccountCard: React.FC<AccountCardProps> = ({ account, onAccountUpdated }) 
   const progressPercentage = ((account.loan_amount - account.current_balance) / account.loan_amount) * 100;
   
   // Calculate time remaining
-  const monthsRemaining = Math.ceil(
-    (account.payoff_date.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24 * 30)
-  );
-  const yearsRemaining = (monthsRemaining / 12).toFixed(1);
+  const totalMonthsRemaining = Math.ceil(
+  (account.payoff_date.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24 * 30)
+);
 
+const yearsRemaining = Math.floor(totalMonthsRemaining / 12);
+const monthsRemaining = totalMonthsRemaining % 12;
+const timeRemianingParts = [];
+if (years) timeRemianingParts.push(`${years} year${years === 1 ? '' : 's'}`);
+if (months) timeRemianingParts.push(`${months} month${months === 1 ? '' : 's'}`);
+
+  const timeRemianingStr = parts.join(' / ') || '0 months';
+  
   return (
     <div 
       className={`bg-white dark:bg-gray-800 rounded-lg shadow-lg border-l-4 ${styles.borderColor} p-6 transition-all duration-300 hover:shadow-xl relative`}
@@ -251,7 +258,7 @@ const AccountCard: React.FC<AccountCardProps> = ({ account, onAccountUpdated }) 
             <span className="text-xs text-gray-500 dark:text-gray-400">Time Remaining</span>
           </div>
           <p className="text-sm font-semibold text-gray-900 dark:text-white">
-            {yearsRemaining} years
+            {timeRemianingStr}
           </p>
         </div>
       </div>
