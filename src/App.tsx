@@ -164,7 +164,6 @@ function App() {
 
                 {/* Right side - Tools */}
                 <div className="flex items-center gap-3">
-                  <BoltLogo />
                   <CurrencySelector />
                   <AuthStatus onShowAuth={handleShowAuth} />
                   <GitHubLink />
@@ -172,6 +171,9 @@ function App() {
                 </div>
               </div>
             </header>
+
+            {/* Fixed Bolt Logo - positioned outside main layout */}
+            <BoltLogo />
 
             {/* Navigation */}
             <Navigation />
