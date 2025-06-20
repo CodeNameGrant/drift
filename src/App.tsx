@@ -17,9 +17,9 @@ import DebtDashboardPage from './pages/DebtDashboardPage';
 import NotFoundPage from './pages/NotFoundPage';
 
 // Contexts and Hooks
-import { useTheme } from './hooks/useTheme';
 import { CurrencyProvider } from './context/CurrencyContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ThemeProvider, useTheme } from './context/ThemeContext';
 
 /**
  * Authentication status component with login/logout functionality
@@ -126,10 +126,9 @@ const AuthModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen,
 };
 
 /**
- * Main application component with React Router setup
- * Features routing, authentication, and global layout
+ * App content component that uses theme context
  */
-function App() {
+const AppContent: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
   const [showAuthModal, setShowAuthModal] = useState(false);
 
@@ -148,64 +147,76 @@ function App() {
   };
 
   return (
-    <CurrencyProvider>
-      <AuthProvider>
-        <Router>
-          <div className="min-h-screen bg-appBackground-light dark:bg-appBackground-dark text-gray-900 dark:text-white transition-colors duration-300">
-            {/* Header with left-aligned app name and right-aligned tools */}
-            <header className="border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm sticky top-0 z-40">
-              <div className="flex items-center justify-between p-4 max-w-7xl mx-auto">
-                {/* Left side - App Name */}
-                <div className="flex items-center">
-                  <h1 className="text-2xl font-bold text-primary dark:text-primary-light tracking-tight">
-                    Drift
-                  </h1>
-                </div>
-
-                {/* Right side - Tools */}
-                <div className="flex items-center gap-3">
-                  <CurrencySelector />
-                  <AuthStatus onShowAuth={handleShowAuth} />
-                  <GitHubLink />
-                  <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
-                </div>
-              </div>
-            </header>
-
-            {/* Fixed Bolt Logo - positioned outside main layout */}
-            <BoltLogo />
-
-            {/* Navigation */}
-            <Navigation />
-
-            {/* Main content with routing */}
-            <main className="flex-1">
-              <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/loan-calculator" element={<LoanCalculatorPage />} />
-                <Route path="/debt-dashboard" element={<DebtDashboardPage />} />
-                <Route path="*" element={<NotFoundPage />} />
-              </Routes>
-            </main>
-
-            {/* Footer */}
-            <footer className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 mt-16">
-              <div className="max-w-7xl mx-auto py-8 px-4 text-center">
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Drift Loan Calculator - Advanced loan simulation and payment analysis
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
-                  Free to use for all users. Sign up to save your calculations and preferences.
-                </p>
-              </div>
-            </footer>
-
-            {/* Authentication Modal - Rendered at root level */}
-            <AuthModal isOpen={showAuthModal} onClose={handleCloseAuth} />
+    <div className="min-h-screen bg-appBackground-light dark:bg-appBackground-dark text-gray-900 dark:text-white transition-colors duration-300">
+      {/* Header with left-aligned app name and right-aligned tools */}
+      <header className="border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm sticky top-0 z-40">
+        <div className="flex items-center justify-between p-4 max-w-7xl mx-auto">
+          {/* Left side - App Name */}
+          <div className="flex items-center">
+            <h1 className="text-2xl font-bold text-primary dark:text-primary-light tracking-tight">
+              Drift
+            </h1>
           </div>
-        </Router>
-      </AuthProvider>
-    </CurrencyProvider>
+
+          {/* Right side - Tools */}
+          <div className="flex items-center gap-3">
+            <CurrencySelector />
+            <AuthStatus onShowAuth={handleShowAuth} />
+            <GitHubLink />
+            <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
+          </div>
+        </div>
+      </header>
+
+      {/* Fixed Bolt Logo - positioned outside main layout */}
+      <BoltLogo />
+
+      {/* Navigation */}
+      <Navigation />
+
+      {/* Main content with routing */}
+      <main className="flex-1">
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/loan-calculator" element={<LoanCalculatorPage />} />
+          <Route path="/debt-dashboard" element={<DebtDashboardPage />} />
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </main>
+
+      {/* Footer */}
+      <footer className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 mt-16">
+        <div className="max-w-7xl mx-auto py-8 px-4 text-center">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Drift Loan Calculator - Advanced loan simulation and payment analysis
+          </p>
+          <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
+            Free to use for all users. Sign up to save your calculations and preferences.
+          </p>
+        </div>
+      </footer>
+
+      {/* Authentication Modal - Rendered at root level */}
+      <AuthModal isOpen={showAuthModal} onClose={handleCloseAuth} />
+    </div>
+  );
+};
+
+/**
+ * Main application component with React Router setup
+ * Features routing, authentication, and global layout
+ */
+function App() {
+  return (
+    <ThemeProvider>
+      <CurrencyProvider>
+        <AuthProvider>
+          <Router>
+            <AppContent />
+          </Router>
+        </AuthProvider>
+      </CurrencyProvider>
+    </ThemeProvider>
   );
 }
 
