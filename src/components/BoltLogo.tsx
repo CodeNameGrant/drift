@@ -27,7 +27,7 @@ const BoltLogo: React.FC = () => {
         WebkitBackdropFilter: 'blur(8px)'
       }}
     >
-      <div className="relative w-12 h-12 transition-transform duration-200">
+      <div className="relative w-14 h-14 transition-transform duration-200">
         <img
           src={theme === 'dark' ? '/white_circle_360x360.png' : '/black_circle_360x360.png'}
           alt="Bolt Logo"
