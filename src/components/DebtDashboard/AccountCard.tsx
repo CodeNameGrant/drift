@@ -144,8 +144,8 @@ const AccountCard: React.FC<AccountCardProps> = ({ account, onAccountUpdated }) 
   (account.payoff_date.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24 * 30)
 );
 
-const yearsRemaining = Math.floor(totalMonthsRemaining / 12);
-const monthsRemaining = totalMonthsRemaining % 12;
+const years = Math.floor(totalMonthsRemaining / 12);
+const months = totalMonthsRemaining % 12;
 const timeRemianingParts = [];
 if (years) timeRemianingParts.push(`${years} year${years === 1 ? '' : 's'}`);
 if (months) timeRemianingParts.push(`${months} month${months === 1 ? '' : 's'}`);
