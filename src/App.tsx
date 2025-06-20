@@ -8,6 +8,7 @@ import GitHubLink from './components/GitHubLink';
 import CurrencySelector from './components/CurrencySelector';
 import AuthUI from './components/AuthUI';
 import Navigation from './components/Navigation';
+import BoltLogo from './components/BoltLogo';
 
 // Pages
 import HomePage from './pages/HomePage';
@@ -163,6 +164,7 @@ function App() {
 
                 {/* Right side - Tools */}
                 <div className="flex items-center gap-3">
+                  <BoltLogo />
                   <CurrencySelector />
                   <AuthStatus onShowAuth={handleShowAuth} />
                   <GitHubLink />
