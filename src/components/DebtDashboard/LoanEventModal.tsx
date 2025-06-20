@@ -92,7 +92,7 @@ const LoanEventModal: React.FC<LoanEventModalProps> = ({
 
   // Calculate new balance for loan withdrawal in real-time
   const calculatedNewBalance = eventType === 'loan_withdrawal' 
-    ? currentBalance + formData.amount 
+    ? currentBalance - formData.amount 
     : formData.newBalance;
 
   /**
@@ -540,7 +540,7 @@ const LoanEventModal: React.FC<LoanEventModalProps> = ({
                   {formatCurrency(calculatedNewBalance, currency.code)}
                 </div>
                 <div className="text-xs text-gray-500 dark:text-gray-400">
-                  Current balance: {formatCurrency(currentBalance, currency.code)} + Withdrawal: {formatCurrency(formData.amount, currency.code)}
+                  Current balance: {formatCurrency(currentBalance, currency.code)} - Withdrawal: {formatCurrency(formData.amount, currency.code)}
                 </div>
               </div>
             </>
