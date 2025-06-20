@@ -20,12 +20,12 @@ const DebtReductionLineChart: React.FC<DebtReductionLineChartProps> = ({ account
   const [zoomLevel, setZoomLevel] = useState(1);
 
   // Generate timeline data
-  const timelineData = useMemo(() => generateDebtReductionData(accounts.filter(account => account.isActive)), [accounts]);
+  const timelineData = useMemo(() => generateDebtReductionData(accounts.filter(account => account.is_active)), [accounts]);
 
   // Prepare chart data
   const chartData = useMemo(() => {
     const visibleAccounts = accounts.filter(account => 
-      account.isActive && !hiddenAccounts.has(account.id)
+      account.is_active && !hiddenAccounts.has(account.id)
     );
 
     return visibleAccounts.map(account => ({
@@ -222,7 +222,7 @@ const DebtReductionLineChart: React.FC<DebtReductionLineChartProps> = ({ account
       <div className="mb-6">
         <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Accounts</h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-          {accounts.filter(account => account.isActive).map((account) => {
+          {accounts.filter(account => account.is_active).map((account) => {
             const isHidden = hiddenAccounts.has(account.id);
             const accountColor = timelineData[0]?.accounts.find(acc => acc.id === account.id)?.color || '#3B82F6';
             
@@ -246,7 +246,7 @@ const DebtReductionLineChart: React.FC<DebtReductionLineChartProps> = ({ account
                 </div>
                 <div className="flex items-center gap-1">
                   <span className="text-xs text-gray-500 dark:text-gray-400">
-                    {formatCurrency(account.currentBalance, currency.code, false)}
+                    {formatCurrency(account.current_balance, currency.code, false)}
                   </span>
                   {isHidden ? (
                     <EyeOff className="h-3 w-3 text-gray-400" />
@@ -291,7 +291,7 @@ const DebtReductionLineChart: React.FC<DebtReductionLineChartProps> = ({ account
               <div className="text-center">
                 <TrendingDown className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                 <p className="text-gray-600 dark:text-gray-400">
-                  {hiddenAccounts.size === accounts.filter(a => a.isActive).length 
+                  {hiddenAccounts.size === accounts.filter(a => a.is_active).length 
                     ? 'All accounts are hidden. Click the legend items to show them.'
                     : 'No debt timeline data available'
                   }

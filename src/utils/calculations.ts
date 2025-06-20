@@ -190,8 +190,8 @@ export const generateDebtReductionData = (accounts: DebtAccount[]): Array<{
 
     const accountBalances = accounts.map(account => {
       // Simple linear reduction calculation for demonstration
-      const monthlyPrincipal = account.monthlyPayment * 0.7; // Assume 70% goes to principal
-      const projectedBalance = Math.max(0, account.currentBalance - (monthlyPrincipal * month));
+      const monthlyPrincipal = account.monthly_payment * 0.7; // Assume 70% goes to principal
+      const projectedBalance = Math.max(0, account.current_balance - (monthlyPrincipal * month));
       
       return {
         id: account.id,
@@ -224,7 +224,7 @@ export const prepareDebtDistributionData = (accounts: DebtAccount[]) => {
         accounts: []
       };
     }
-    acc[account.type].totalBalance += account.currentBalance;
+    acc[account.type].totalBalance += account.current_balance;
     acc[account.type].count += 1;
     acc[account.type].accounts.push(account);
     return acc;
@@ -247,8 +247,8 @@ export const prepareInterestRateData = (accounts: DebtAccount[]) => {
     .map(account => ({
       id: account.id,
       name: account.name,
-      rate: account.interestRate,
-      balance: account.currentBalance,
+      rate: account.interest_rate,
+      balance: account.current_balance,
       type: account.type,
       color: getAccountTypeColor(account.type)
     }))

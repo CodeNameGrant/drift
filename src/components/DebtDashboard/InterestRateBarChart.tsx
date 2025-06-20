@@ -19,7 +19,7 @@ const InterestRateBarChart: React.FC<InterestRateBarChartProps> = ({ accounts })
 
   // Prepare chart data
   const chartData = useMemo(() => {
-    const rateData = prepareInterestRateData(accounts.filter(account => account.isActive));
+    const rateData = prepareInterestRateData(accounts.filter(account => account.is_active));
     
     return [{
       label: 'Interest Rates',

@@ -20,7 +20,7 @@ const DebtDistributionPieChart: React.FC<DebtDistributionPieChartProps> = ({ acc
 
   // Prepare chart data
   const chartData = useMemo(() => {
-    const distributionData = prepareDebtDistributionData(accounts.filter(account => account.isActive));
+    const distributionData = prepareDebtDistributionData(accounts.filter(account => account.is_active));
     
     // Filter out hidden types
     const visibleData = distributionData.filter(item => !hiddenTypes.has(item.label));
@@ -154,7 +154,7 @@ const DebtDistributionPieChart: React.FC<DebtDistributionPieChartProps> = ({ acc
 
   // Get all distribution data for legend
   const allDistributionData = useMemo(() => 
-    prepareDebtDistributionData(accounts.filter(account => account.isActive)), 
+    prepareDebtDistributionData(accounts.filter(account => account.is_active)), 
     [accounts]
   );
 
