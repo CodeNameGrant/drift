@@ -22,7 +22,7 @@ import { DebtAccount, LoanEventType } from '../../types/debt';
 import { formatCurrency, formatPercentage, formatDate } from '../../utils/calculations';
 import { useCurrency } from '../../context/CurrencyContext';
 import { DebtService } from '../../services/debtService';
-import { LoanEventModal } from './LoanEventModal';
+import LoanEventModal from './LoanEventModal';
 
 interface AccountCardProps {
   account: DebtAccount;
