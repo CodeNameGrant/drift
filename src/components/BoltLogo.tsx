@@ -7,7 +7,7 @@ import { useTheme } from '../hooks/useTheme';
  */
 const BoltLogo: React.FC = () => {
   const { theme } = useTheme();
-
+console.log(theme)
   /**
    * Handle logo click - opens bolt.new in new tab
    */
